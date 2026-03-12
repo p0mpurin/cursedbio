@@ -887,8 +887,29 @@ export default function PropertiesPanel({
                     </Row>
                     <Row>
                         <Label>Icon size (px)</Label>
-                        <StepperField value={(element.props.iconSize as number) ?? 24} min={12} max={64} onChange={(v) => prop('iconSize', v)} step={2} />
+                        <StepperField
+                            value={(element.props.iconSize as number) ?? 24}
+                            min={12}
+                            max={(element.props.iconPosition as string) === 'only' ? 128 : 64}
+                            onChange={(v) => prop('iconSize', v)}
+                            step={2}
+                        />
                     </Row>
+                    {(element.props.iconPosition as string) === 'only' && (
+                        <Row>
+                            <Label>Hover effect</Label>
+                            <select
+                                value={(element.props.iconLinkHover as string) ?? 'scale'}
+                                onChange={(e) => prop('iconLinkHover', e.target.value)}
+                                className="w-full bg-white/5 border border-white/10 rounded-md px-2 py-1.5 text-sm text-[var(--messmer-ivory)] focus:outline-none focus:border-[var(--messmer-copper)]/60 transition"
+                            >
+                                <option value="none" className="bg-[#1a1714]">None</option>
+                                <option value="scale" className="bg-[#1a1714]">Scale up</option>
+                                <option value="lift" className="bg-[#1a1714]">Lift + shadow</option>
+                                <option value="glow" className="bg-[#1a1714]">Glow</option>
+                            </select>
+                        </Row>
+                    )}
                     <Row>
                         <Label>Link URL</Label>
                         <Inp value={(element.props.href as string) ?? ''} placeholder="https://... (leave empty for copy)" onChange={(v) => prop('href', v)} />
@@ -910,6 +931,10 @@ export default function PropertiesPanel({
                     <Row>
                         <Label>Border Radius</Label>
                         <Inp value={(element.props.borderRadius as string) ?? '8px'} onChange={(v) => prop('borderRadius', v)} />
+                    </Row>
+                    <Row>
+                        <Label>Border</Label>
+                        <Inp value={(element.props.border as string) ?? ''} placeholder="e.g. 1px solid rgba(255,255,255,0.2)" onChange={(v) => prop('border', v)} />
                     </Row>
                     <Row>
                         <Label>Font Size (px)</Label>

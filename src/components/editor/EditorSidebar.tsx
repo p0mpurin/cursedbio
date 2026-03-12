@@ -131,10 +131,13 @@ const MORE_ELEMENTS: Array<{ label: string; icon: string; template: Omit<PageEle
     icon: 'Link',
     template: {
       type: 'button',
-      x: 100, y: 100, width: 44, height: 44, zIndex: 15,
+      x: 100, y: 100, width: 48, height: 48, zIndex: 15,
       props: {
         label: '',
         icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/github.svg',
+        iconPosition: 'only',
+        iconSize: 28,
+        iconLinkHover: 'scale',
         href: 'https://github.com',
         backgroundColor: 'transparent',
         borderRadius: '50%',

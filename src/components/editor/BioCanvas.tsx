@@ -7,15 +7,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PageElement, PageLayout } from '@/lib/db'
 
-const NITRO_BADGE_IMG =
-  'https://cdn.jsdelivr.net/gh/merlinfuchs/discord-badges@main/SVG/nitro.svg'
+const BADGE_CDN = 'https://cdn.jsdelivr.net/gh/merlinfuchs/discord-badges@main/SVG'
+const NITRO_BADGE_IMG = `${BADGE_CDN}/nitro.svg`
 
 function DiscordBadgeIcon({ badge }: { badge: string }) {
   const getBadgeDetails = (b: string): { color: string; path: string; title: string; imageUrl?: string } | null => {
     switch (b) {
       case 'staff': return { color: '#5865F2', path: 'M14.5 10c0-1.4-1.1-2.5-2.5-2.5S9.5 8.6 9.5 10s1.1 2.5 2.5 2.5 2.5-1.1 2.5-2.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z', title: 'Discord Staff' }
       case 'partner': return { color: '#5865F2', path: 'M21.5 9.5l-2.5-1 .5-2.5-2.5-.5-1-2.5-2.5.5-2-1.5-2 1.5-2.5-.5-1 2.5-2.5.5.5 2.5-2.5 1 1.5 2-1.5 2 2.5 1-.5 2.5 2.5.5 1 2.5 2.5-.5 2 1.5 2-1.5 2.5.5 1-2.5 2.5-.5-.5-2.5 2.5-1-1.5-2 1.5-2zm-5.5 5.5l-4 4-4-4v-5l4-3 4 3v5z', title: 'Partnered Server Owner' }
-      case 'hypesquad': return { color: '#F8A532', path: 'M12 2L2 22h20L12 2zm0 4.5l6.5 13h-13L12 6.5zM12 10v4h-1v-4h1zm0 6v-1h-1v1h1z', title: 'HypeSquad Events' }
+      case 'hypesquad': return { color: '#F8A532', path: '', title: 'HypeSquad Events', imageUrl: `${BADGE_CDN}/hypesquad_events.svg` }
       case 'bug_hunter_1': return { color: '#43B581', path: 'M20 13h-2v-2h-2v2h-2v-2h-2v2h-2v-2H8v2H6v-2H4v3h16v-3h-2zm-6-4H8v2h6V9zm0-3H8v2h6V6z', title: 'Discord Bug Hunter' }
       case 'bug_hunter_2': return { color: '#FAA61A', path: 'M20 13h-2v-2h-2v2h-2v-2h-2v2h-2v-2H8v2H6v-2H4v3h16v-3h-2zm-6-4H8v2h6V9zm0-3H8v2h6V6z', title: 'Discord Bug Hunter' }
       case 'hypesquad_bravery': return { color: '#9B84EE', path: 'M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4zm0 16.5c-3.55 0-6.5-3.37-6.5-7.5S8.45 3.5 12 3.5s6.5 3.37 6.5 7.5-2.95 7.5-6.5 7.5zm-3-8h6v2H9v-2z', title: 'HypeSquad Bravery' }
@@ -896,6 +896,11 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
       const copyUrl = !!el.props.copyUrl
       const icon = el.props.icon as string | undefined
       const label = (el.props.label as string) ?? ''
+      const iconPos = (el.props.iconPosition as string) ?? 'left'
+      const isIconOnly = iconPos === 'only' && icon
+      const maxIconPx = Math.min(el.width || 48, el.height || 48)
+      const iconSize = (el.props.iconSize as number) ?? (isIconOnly ? Math.min(32, maxIconPx * 0.85) : Math.min(24, maxIconPx * 0.6))
+      const hoverEffect = (el.props.iconLinkHover as string) ?? 'scale'
       const sharedStyle: React.CSSProperties = {
         width: '100%', height: '100%',
         backgroundColor: (el.props.backgroundColor as string) ?? '#B66E41',
@@ -904,10 +909,11 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
         fontSize: (el.props.fontSize as number) ?? 16,
         boxShadow: (el.props.boxShadow as string) ?? undefined,
         opacity: (el.props.opacity as number) ?? 1,
-        border: 'none',
+        border: (el.props.border as string) ?? 'none',
         cursor: isEditMode ? 'default' : 'pointer',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         gap: 8,
+        transition: isEditMode ? undefined : 'transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease',
       }
       const handleClick = (e: React.MouseEvent) => {
         if (isEditMode) return
@@ -916,17 +922,22 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
           navigator.clipboard.writeText(typeof window !== 'undefined' ? window.location.href : '')
         }
       }
-      const iconPos = (el.props.iconPosition as string) ?? 'left'
-      const iconSize = (el.props.iconSize as number) ?? Math.min(24, Math.min(el.width || 40, el.height || 40) * 0.6)
-      const showLabel = iconPos !== 'only' && (label || !icon)
-      const iconEl = icon ? <img src={icon} alt="" draggable={false} style={{ width: iconSize, height: iconSize, objectFit: 'contain', flexShrink: 0 }} /> : null
+      const showLabel = !isIconOnly && (label || !icon)
+      const iconEl = icon ? <img src={icon} alt="" draggable={false} style={{ width: iconSize, height: iconSize, objectFit: 'contain', flexShrink: 0, pointerEvents: 'none' }} /> : null
       const content = (
         <>
-          {iconPos === 'left' && iconEl}
+          {(iconPos === 'left' || isIconOnly) && iconEl}
           {showLabel ? label : null}
           {iconPos === 'right' && iconEl}
         </>
       )
+      const wrapperClassName = !isEditMode && (hoverEffect === 'scale' || hoverEffect === 'lift' || hoverEffect === 'glow')
+        ? hoverEffect === 'scale'
+          ? 'hover:scale-110'
+          : hoverEffect === 'lift'
+            ? 'hover:-translate-y-0.5 hover:shadow-lg'
+            : 'hover:shadow-[0_0_20px_rgba(255,255,255,0.25)]'
+        : undefined
       if (!isEditMode && href && !copyUrl) {
         return (
           <a
@@ -934,13 +945,14 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
             target={href.startsWith('#') ? undefined : '_blank'}
             rel={href.startsWith('#') ? undefined : 'noopener noreferrer'}
             style={sharedStyle}
+            className={wrapperClassName}
           >
             {content}
           </a>
         )
       }
       return (
-        <button onClick={handleClick} style={sharedStyle}>
+        <button onClick={handleClick} style={sharedStyle} className={wrapperClassName}>
           {content}
         </button>
       )
