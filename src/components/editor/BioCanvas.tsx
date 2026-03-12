@@ -950,8 +950,8 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
       const bg = (el.props.backgroundColor as string) ?? 'transparent'
       const mouseTilt = !!(el.props.mouseTilt as boolean)
       const tiltIntensity = (el.props.tiltIntensity as number) ?? 12
-      const isOpaque = !bg || bg === 'transparent' || bg === 'rgba(0,0,0,0)' || /^#[0-9a-fA-F]{6}$/.test(bg) || /^#[0-9a-fA-F]{8}$/.test(bg)
-      const effectiveBg = bf && isOpaque ? 'rgba(255,255,255,0.08)' : bg
+      const noExplicitBg = !bg || bg === 'transparent' || bg === 'rgba(0,0,0,0)'
+      const effectiveBg = bf && noExplicitBg ? 'rgba(255,255,255,0.08)' : bg
       const innerStyle: React.CSSProperties = {
         width: '100%', height: '100%',
         backgroundColor: effectiveBg,
@@ -1484,8 +1484,8 @@ function StaticContainerWithPinned({ container, pinned }: { container: PageEleme
   const props = container.props ?? {}
   const bf = (props.backdropFilter as string) ?? ''
   const bg = (props.backgroundColor as string) ?? 'transparent'
-  const isOpaque = !bg || bg === 'transparent' || bg === 'rgba(0,0,0,0)' || /^#[0-9a-fA-F]{6}$/.test(bg) || /^#[0-9a-fA-F]{8}$/.test(bg)
-  let effectiveBg = bf && isOpaque ? 'rgba(255,255,255,0.08)' : bg
+  const noExplicitBg = !bg || bg === 'transparent' || bg === 'rgba(0,0,0,0)'
+  let effectiveBg = bf && noExplicitBg ? 'rgba(255,255,255,0.08)' : bg
   if (effectiveBg === 'transparent' && !bf) effectiveBg = 'rgba(255,255,255,0.04)'
 
   const innerStyle: React.CSSProperties = {
@@ -1550,8 +1550,8 @@ function StaticContainerWithTiltAndPinned({ container, pinned }: { container: Pa
   const props = container.props ?? {}
   const bf = (props.backdropFilter as string) ?? ''
   const bg = (props.backgroundColor as string) ?? 'transparent'
-  const isOpaque = !bg || bg === 'transparent' || bg === 'rgba(0,0,0,0)' || /^#[0-9a-fA-F]{6}$/.test(bg) || /^#[0-9a-fA-F]{8}$/.test(bg)
-  let effectiveBg = bf && isOpaque ? 'rgba(255,255,255,0.08)' : bg
+  const noExplicitBg = !bg || bg === 'transparent' || bg === 'rgba(0,0,0,0)'
+  let effectiveBg = bf && noExplicitBg ? 'rgba(255,255,255,0.08)' : bg
   if (effectiveBg === 'transparent' && !bf) effectiveBg = 'rgba(255,255,255,0.04)'
 
   const innerStyle: React.CSSProperties = {

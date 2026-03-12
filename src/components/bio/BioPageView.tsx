@@ -63,8 +63,13 @@ export default function BioPageView({
   const isImageBg = canvas.backgroundType === 'image' && canvas.backgroundImage
   const pageBgStyle: CSSProperties = isImageBg
     ? {
+        width: '100%',
+        height: '100%',
+        minWidth: '100%',
+        minHeight: '100%',
+        boxSizing: 'border-box',
         backgroundImage: `url(${canvas.backgroundImage})`,
-        backgroundSize: (canvas.backgroundImageSize || 'cover') === 'fill' ? '100% 100%' : (canvas.backgroundImageSize || 'cover'),
+        backgroundSize: 'cover',
         backgroundPosition: canvas.backgroundImagePosition || 'center',
         backgroundRepeat: 'no-repeat',
         backgroundColor: canvas.backgroundColor || '#0a0908',
