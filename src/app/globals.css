@@ -1,0 +1,255 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --messmer-black: #000000;
+  --dark-blue: #0a0a0a;
+  --dark-blue-mid: #0d0d0d;
+  --dark-blue-soft: #111111;
+  --accent-blue: #525252;
+  --accent-blue-soft: #737373;
+  --messmer-copper: #a3a3a3;
+  --messmer-fiery-orange: #737373;
+  --messmer-ivory: #e5e5e5;
+  --messmer-deep-crimson: #171717;
+
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+  --text-primary: #e5e5e5;
+  --text-muted: #a3a3a3;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.landing-bg {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 120%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 20%, rgba(255, 255, 255, 0.015) 0%, transparent 40%),
+    var(--bg-primary);
+}
+
+/* Hypnotic serpentine paths */
+.landing-serpent {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.landing-serpent path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.04);
+  stroke-width: 1;
+  stroke-dasharray: 4 8;
+  animation: serpent-dash 20s linear infinite;
+}
+
+.landing-serpent path:nth-child(2) {
+  stroke: rgba(255, 255, 255, 0.03);
+  animation-duration: 25s;
+  animation-direction: reverse;
+}
+
+@keyframes serpent-dash {
+  to { stroke-dashoffset: -100; }
+}
+
+@keyframes title-glow {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.06)); }
+  50% { filter: drop-shadow(0 0 35px rgba(255, 255, 255, 0.1)); }
+}
+
+.landing-title {
+  animation: title-glow 4s ease-in-out infinite;
+}
+
+/* Mesmerizing character reveal */
+@keyframes char-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.landing-reveal {
+  animation: char-reveal 0.4s ease-out forwards;
+}
+
+.landing-reveal span {
+  display: inline-block;
+  opacity: 0;
+  animation: char-reveal 0.6s ease-out forwards;
+}
+
+.landing-char {
+  display: inline-block;
+  opacity: 0;
+  animation: char-reveal 0.35s ease-out forwards;
+}
+
+.landing-reveal-delay {
+  opacity: 0;
+  animation: char-reveal 0.4s ease-out 0.35s forwards;
+}
+
+/* Organic ambient shapes */
+.landing-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  animation: orb-drift 15s ease-in-out infinite;
+}
+
+@keyframes orb-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20px, -30px) scale(1.1); }
+  66% { transform: translate(-15px, 20px) scale(0.95); }
+}
+
+/* Bio editor text effects */
+@keyframes textFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes textGlitch {
+  0%, 90%, 100% { transform: translate(0); filter: none; }
+  92% { transform: translate(-2px, 2px); filter: hue-rotate(5deg); }
+  94% { transform: translate(2px, -2px); filter: hue-rotate(-5deg); }
+  96% { transform: translate(-1px, -1px); filter: hue-rotate(3deg); }
+  98% { transform: translate(1px, 1px); filter: hue-rotate(-3deg); }
+}
+
+@keyframes textGlow {
+  0%, 100% { filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 8px currentColor); opacity: 1; }
+  50% { filter: drop-shadow(0 0 12px currentColor) drop-shadow(0 0 24px currentColor); opacity: 0.95; }
+}
+
+.text-effect-glow-particles {
+  position: relative;
+  isolation: isolate;
+}
+.text-effect-glow-particles::before,
+.text-effect-glow-particles::after {
+  content: '';
+  position: absolute;
+  inset: -20% -30%;
+  pointer-events: none;
+  z-index: -1;
+}
+.text-effect-glow-particles::before {
+  background: radial-gradient(circle at 30% 40%, currentColor 2px, transparent 2px),
+    radial-gradient(circle at 70% 60%, currentColor 1.5px, transparent 1.5px),
+    radial-gradient(circle at 50% 80%, currentColor 1px, transparent 1px);
+  background-size: 40px 40px, 35px 38px, 30px 35px;
+  opacity: 0.35;
+  animation: particlesFloat 5s ease-in-out infinite;
+}
+.text-effect-glow-particles::after {
+  inset: -15% -25%;
+  background: radial-gradient(circle at 60% 30%, currentColor 1px, transparent 1px),
+    radial-gradient(circle at 20% 70%, currentColor 1.5px, transparent 1.5px);
+  background-size: 25px 28px, 32px 30px;
+  opacity: 0.2;
+  animation: particlesFloat 6s ease-in-out infinite reverse;
+  animation-delay: -1.5s;
+}
+@keyframes particlesFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.35; }
+  33% { transform: translate(3px, -4px) scale(1.05); opacity: 0.4; }
+  66% { transform: translate(-2px, 3px) scale(0.98); opacity: 0.3; }
+}
+
+.landing-orb--copper {
+  background: rgba(255, 255, 255, 0.03);
+  width: 300px;
+  height: 300px;
+  top: 10%;
+  left: 10%;
+}
+
+.landing-orb--crimson {
+  background: rgba(255, 255, 255, 0.02);
+  width: 250px;
+  height: 250px;
+  bottom: 20%;
+  right: 15%;
+  animation-delay: -5s;
+}
+
+/* Scrollbar styling for editor panels */
+.editor-panel::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.editor-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+.editor-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+.editor-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Custom scrollbar for central canvas area */
+.editor-canvas-scroll::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+.editor-canvas-scroll::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-left: 1px solid rgba(255,255,255,0.05);
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.editor-canvas-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border: 3px solid var(--bg-secondary);
+  border-radius: 8px;
+}
+.editor-canvas-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.25);
+}
+.editor-canvas-scroll::-webkit-scrollbar-corner {
+  background: var(--bg-secondary);
+}
+
+/* Canvas background checkerboard pattern */
+.canvas-checkerboard {
+  background-color: var(--bg-secondary);
+  background-image: 
+    linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.02)), 
+    linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.02));
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+}
+
+/* Snapping guides */
+.snap-line {
+  position: absolute;
+  background-color: var(--accent-blue);
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.8;
+  box-shadow: 0 0 4px var(--accent-blue);
+}
+.snap-line.vertical {
+  width: 1px;
+  height: 100%;
+  top: 0;
+}
+.snap-line.horizontal {
+  width: 100%;
+  height: 1px;
+  left: 0;
+}

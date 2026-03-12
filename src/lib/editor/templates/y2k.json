@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "canvas": {
+    "width": 390,
+    "height": 844,
+    "backgroundType": "gradient",
+    "backgroundGradient": "linear-gradient(160deg, #1a0a2e 0%, #16213e 30%, #0f3460 60%, #e94560 100%)"
+  },
+  "elements": [
+    {"id": "card", "type": "div", "name": "Card", "x": 30, "y": 80, "width": 330, "height": 500, "zIndex": 1, "props": {"backgroundColor": "rgba(255,255,255,0.06)", "backdropFilter": "blur(16px)", "borderRadius": "24px", "border": "1px solid rgba(255,255,255,0.12)", "mouseTilt": true, "tiltIntensity": 15}},
+    {"id": "name", "type": "text", "name": "Name", "x": 50, "y": 140, "width": 290, "height": 56, "zIndex": 10, "pinnedTo": "card", "props": {"content": "Y2K DREAMER", "fontSize": 36, "fontFamily": "Bebas Neue", "color": "#ff6ec7", "fontWeight": "400", "textAlign": "center", "textEffect": "typewriter", "typewriterSpeed": 60}},
+    {"id": "tagline", "type": "text", "name": "Tagline", "x": 50, "y": 210, "width": 290, "height": 32, "zIndex": 10, "pinnedTo": "card", "props": {"content": "vaporwave • aesthetic • 2000s", "fontSize": 12, "fontFamily": "Space Grotesk", "color": "rgba(255,255,255,0.7)", "textAlign": "center", "textEffect": "glitch"}},
+    {"id": "avatar", "type": "image", "name": "Avatar", "x": 115, "y": 260, "width": 160, "height": 160, "zIndex": 10, "pinnedTo": "card", "props": {"src": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400", "objectFit": "cover", "borderRadius": "50%"}},
+    {"id": "bt1", "type": "button", "name": "Social", "x": 70, "y": 450, "width": 80, "height": 44, "zIndex": 12, "pinnedTo": "card", "props": {"label": "", "icon": "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/instagram.svg", "href": "https://instagram.com", "backgroundColor": "transparent", "borderRadius": "50%", "color": "#fff"}},
+    {"id": "bt2", "type": "button", "name": "Social", "x": 160, "y": 450, "width": 80, "height": 44, "zIndex": 12, "pinnedTo": "card", "props": {"label": "", "icon": "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/twitter.svg", "href": "https://twitter.com", "backgroundColor": "transparent", "borderRadius": "50%", "color": "#fff"}},
+    {"id": "bt3", "type": "button", "name": "Social", "x": 250, "y": 450, "width": 80, "height": 44, "zIndex": 12, "pinnedTo": "card", "props": {"label": "", "icon": "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/discord.svg", "href": "https://discord.com", "backgroundColor": "transparent", "borderRadius": "50%", "color": "#fff"}}
+  ]
+}

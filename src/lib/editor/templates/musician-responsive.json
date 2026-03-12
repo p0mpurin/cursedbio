@@ -1,0 +1,48 @@
+{
+  "version": 2,
+  "responsiveBreakpoint": 768,
+  "mobile": {
+    "version": 2,
+    "canvas": {
+      "width": 390,
+      "height": 844,
+      "backgroundType": "gradient",
+      "backgroundGradient": "linear-gradient(180deg, #0a0908 0%, #1a1512 40%, #0a0908 100%)",
+      "clickToEnter": true,
+      "enterScreenTitle": "ENTER",
+      "enterScreenSubtitle": "Click to continue",
+      "enterScreenBlur": 12
+    },
+    "elements": [
+      {"id": "card", "type": "div", "name": "Card", "x": 40, "y": 60, "width": 310, "height": 520, "zIndex": 1, "props": {"backgroundColor": "rgba(255,255,255,0.06)", "backdropFilter": "blur(16px)", "borderRadius": "24px", "border": "1px solid rgba(255,255,255,0.1)", "mouseTilt": true}},
+      {"id": "avatar", "type": "image", "name": "Photo", "x": 95, "y": 100, "width": 200, "height": 200, "zIndex": 5, "pinnedTo": "card", "props": {"src": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=400", "objectFit": "cover", "borderRadius": "50%"}},
+      {"id": "name", "type": "text", "name": "Name", "x": 60, "y": 320, "width": 270, "height": 48, "zIndex": 10, "pinnedTo": "card", "props": {"content": "Luna", "fontSize": 36, "fontFamily": "Playfair Display", "color": "#E0DAC9", "fontWeight": "600", "textAlign": "center"}},
+      {"id": "tagline", "type": "text", "name": "Tagline", "x": 60, "y": 375, "width": 270, "height": 24, "zIndex": 8, "pinnedTo": "card", "props": {"content": "Dream pop artist", "fontSize": 14, "fontFamily": "Inter", "color": "#9a958c", "textAlign": "center"}},
+      {"id": "bt1", "type": "button", "name": "Spotify", "x": 55, "y": 430, "width": 130, "height": 48, "zIndex": 12, "pinnedTo": "card", "props": {"label": "Spotify", "icon": "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/spotify.svg", "href": "https://spotify.com", "backgroundColor": "#1DB954", "color": "#fff", "borderRadius": "12px", "fontSize": 15}},
+      {"id": "bt2", "type": "button", "name": "Bandcamp", "x": 205, "y": 430, "width": 130, "height": 48, "zIndex": 12, "pinnedTo": "card", "props": {"label": "Bandcamp", "icon": "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/bandcamp.svg", "href": "https://bandcamp.com", "backgroundColor": "#B66E41", "color": "#fff", "borderRadius": "12px", "fontSize": 15}},
+      {"id": "audio", "type": "audio", "name": "Music", "x": 95, "y": 500, "width": 200, "height": 50, "zIndex": 6, "pinnedTo": "card", "props": {"src": "", "autoplay": true, "controls": true, "color": "#E0DAC9"}}
+    ]
+  },
+  "desktop": {
+    "version": 2,
+    "canvas": {
+      "width": 1200,
+      "height": 800,
+      "backgroundType": "gradient",
+      "backgroundGradient": "linear-gradient(180deg, #0a0908 0%, #1a1512 40%, #0a0908 100%)",
+      "clickToEnter": true,
+      "enterScreenTitle": "ENTER",
+      "enterScreenSubtitle": "Click to continue",
+      "enterScreenBlur": 12
+    },
+    "elements": [
+      {"id": "card", "type": "div", "name": "Card", "x": 350, "y": 100, "width": 500, "height": 600, "zIndex": 1, "props": {"backgroundColor": "rgba(255,255,255,0.06)", "backdropFilter": "blur(16px)", "borderRadius": "24px", "border": "1px solid rgba(255,255,255,0.1)", "mouseTilt": true}},
+      {"id": "avatar", "type": "image", "name": "Photo", "x": 450, "y": 150, "width": 300, "height": 300, "zIndex": 5, "pinnedTo": "card", "props": {"src": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=600", "objectFit": "cover", "borderRadius": "50%"}},
+      {"id": "name", "type": "text", "name": "Name", "x": 400, "y": 480, "width": 400, "height": 64, "zIndex": 10, "pinnedTo": "card", "props": {"content": "Luna", "fontSize": 48, "fontFamily": "Playfair Display", "color": "#E0DAC9", "fontWeight": "600", "textAlign": "center"}},
+      {"id": "tagline", "type": "text", "name": "Tagline", "x": 400, "y": 550, "width": 400, "height": 32, "zIndex": 8, "pinnedTo": "card", "props": {"content": "Dream pop artist", "fontSize": 18, "fontFamily": "Inter", "color": "#9a958c", "textAlign": "center"}},
+      {"id": "bt1", "type": "button", "name": "Spotify", "x": 400, "y": 600, "width": 200, "height": 56, "zIndex": 12, "pinnedTo": "card", "props": {"label": "Spotify", "icon": "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/spotify.svg", "href": "https://spotify.com", "backgroundColor": "#1DB954", "color": "#fff", "borderRadius": "12px", "fontSize": 18}},
+      {"id": "bt2", "type": "button", "name": "Bandcamp", "x": 620, "y": 600, "width": 200, "height": 56, "zIndex": 12, "pinnedTo": "card", "props": {"label": "Bandcamp", "icon": "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/bandcamp.svg", "href": "https://bandcamp.com", "backgroundColor": "#B66E41", "color": "#fff", "borderRadius": "12px", "fontSize": 18}},
+      {"id": "audio", "type": "audio", "name": "Music", "x": 450, "y": 665, "width": 300, "height": 50, "zIndex": 6, "pinnedTo": "card", "props": {"src": "", "autoplay": true, "controls": true, "color": "#E0DAC9"}}
+    ]
+  }
+}

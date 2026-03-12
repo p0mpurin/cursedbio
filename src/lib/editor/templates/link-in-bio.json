@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "canvas": {
+    "width": 390,
+    "height": 844,
+    "backgroundType": "gradient",
+    "backgroundGradient": "linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%)"
+  },
+  "elements": [
+    {"id": "hero", "type": "image", "name": "Hero", "x": 0, "y": 0, "width": 390, "height": 200, "zIndex": 2, "props": {"src": "https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=800", "objectFit": "cover"}},
+    {"id": "avatar", "type": "image", "name": "Avatar", "x": 145, "y": 160, "width": 100, "height": 100, "zIndex": 5, "props": {"src": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200", "objectFit": "cover", "borderRadius": "50%", "border": "4px solid #0f0f0f"}},
+    {"id": "name", "type": "text", "name": "Name", "x": 40, "y": 280, "width": 310, "height": 40, "zIndex": 10, "props": {"content": "Your Name", "fontSize": 28, "fontFamily": "Inter", "color": "#fff", "fontWeight": "600", "textAlign": "center"}},
+    {"id": "tagline", "type": "text", "name": "Tagline", "x": 40, "y": 320, "width": 310, "height": 24, "zIndex": 8, "props": {"content": "What you do | Where you are", "fontSize": 14, "fontFamily": "Inter", "color": "#888", "textAlign": "center"}},
+    {"id": "links", "type": "div", "name": "Links container", "x": 40, "y": 380, "width": 310, "height": 380, "zIndex": 3, "props": {"backgroundColor": "rgba(255,255,255,0.05)", "backdropFilter": "blur(12px)", "borderRadius": "16px", "border": "1px solid rgba(255,255,255,0.1)", "mouseTilt": true}},
+    {"id": "link1", "type": "button", "name": "Link 1", "x": 55, "y": 400, "width": 280, "height": 52, "zIndex": 12, "pinnedTo": "links", "props": {"label": "Portfolio", "href": "#", "backgroundColor": "#fff", "color": "#111", "borderRadius": "12px", "fontSize": 16, "fontWeight": "500"}},
+    {"id": "link2", "type": "button", "name": "Link 2", "x": 55, "y": 465, "width": 280, "height": 52, "zIndex": 12, "pinnedTo": "links", "props": {"label": "Instagram", "href": "#", "backgroundColor": "#fff", "color": "#111", "borderRadius": "12px", "fontSize": 16, "fontWeight": "500"}},
+    {"id": "link3", "type": "button", "name": "Link 3", "x": 55, "y": 530, "width": 280, "height": 52, "zIndex": 12, "pinnedTo": "links", "props": {"label": "Contact", "href": "#", "backgroundColor": "#fff", "color": "#111", "borderRadius": "12px", "fontSize": 16, "fontWeight": "500"}},
+    {"id": "views", "type": "profileViews", "name": "Views", "x": 40, "y": 620, "width": 120, "height": 28, "zIndex": 10, "props": {"count": 1234, "fontSize": 12, "color": "#666"}}
+  ]
+}
