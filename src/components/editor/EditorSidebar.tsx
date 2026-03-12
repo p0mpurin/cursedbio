@@ -63,7 +63,7 @@ const MORE_ELEMENTS: Array<{ label: string; icon: string; template: Omit<PageEle
     icon: 'Au',
     template: {
       type: 'audio',
-      x: 100, y: 100, width: 300, height: 50, zIndex: 3,
+      x: 100, y: 100, width: 300, height: 50, zIndex: 50,
       props: { src: '', controls: true }
     }
   },

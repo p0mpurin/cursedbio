@@ -1472,10 +1472,15 @@ function StaticNode({ el, layout }: { el: PageElement; layout?: PageLayout }) {
 
 /** Simple container that renders its pinned children (no tilt). Used for main content area. */
 function StaticContainerWithPinned({ container, pinned }: { container: PageElement; pinned: PageElement[] }) {
+  const bf = (container.props.backdropFilter as string) ?? ''
+  const bg = (container.props.backgroundColor as string) ?? 'transparent'
+  const isOpaque = !bg || bg === 'transparent' || bg === 'rgba(0,0,0,0)' || /^#[0-9a-fA-F]{6}$/.test(bg) || /^#[0-9a-fA-F]{8}$/.test(bg)
+  const effectiveBg = bf && isOpaque ? 'rgba(255,255,255,0.08)' : bg
+
   const innerStyle: React.CSSProperties = {
     position: 'absolute',
     inset: 0,
-    backgroundColor: (container.props.backgroundColor as string) ?? 'transparent',
+    backgroundColor: effectiveBg,
     background: (container.props.background as string) || undefined,
     backgroundImage: (container.props.backgroundImage as string) ? `url(${container.props.backgroundImage})` : undefined,
     backgroundSize: (container.props.backgroundSize as string) ?? 'cover',
@@ -1483,9 +1488,10 @@ function StaticContainerWithPinned({ container, pinned }: { container: PageEleme
     borderRadius: (container.props.borderRadius as string) ?? '0',
     border: (container.props.border as string) ?? undefined,
     boxShadow: (container.props.boxShadow as string) ?? undefined,
-    backdropFilter: (container.props.backdropFilter as string) ?? undefined,
-    WebkitBackdropFilter: (container.props.backdropFilter as string) ?? undefined,
+    backdropFilter: bf || undefined,
+    WebkitBackdropFilter: bf || undefined,
     opacity: (container.props.opacity as number) ?? 1,
+    ...(bf ? { isolation: 'isolate' as const, transform: 'translateZ(0)' } : {}),
   }
   return (
     <div
