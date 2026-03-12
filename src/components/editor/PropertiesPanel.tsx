@@ -282,6 +282,7 @@ function TransformField({
 
 function parseRgba(str: string): { r: number, g: number, b: number, a: number } | null {
     if (!str) return null
+    str = String(str).trim()
     if (str.startsWith('#')) {
         let hex = str.replace('#', '')
         if (hex.length === 3) hex = hex.split('').map(c => c + c).join('')
@@ -295,7 +296,7 @@ function parseRgba(str: string): { r: number, g: number, b: number, a: number } 
             }
         }
     }
-    const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/)
+    const match = str.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/)
     if (match) {
         return {
             r: parseInt(match[1]),
@@ -1243,7 +1244,7 @@ export default function PropertiesPanel({
                             <StepperField value={(element.props.tiltIntensity as number) ?? 12} min={2} max={30} onChange={(v) => prop('tiltIntensity', v)} />
                         </Row>
                     )}
-                    <AlphaColorRow label="Background" value={(element.props.backgroundColor as string) ?? 'rgba(255,255,255,0.05)'} onChange={(v) => prop('backgroundColor', v)} />
+                    <AlphaColorRow key={`div-bg-${element.id}-${String(element.props.backgroundColor ?? '')}`} label="Background" value={(element.props.backgroundColor as string) ?? 'rgba(255,255,255,0.05)'} onChange={(v) => prop('backgroundColor', v)} />
                     <Row>
                         <Label>Backdrop Blur</Label>
                         <div className="flex gap-2 items-center">

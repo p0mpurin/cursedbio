@@ -936,8 +936,8 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
         if (isEditMode) return
         if (copyUrl) {
           e.preventDefault()
-          const url = typeof window !== 'undefined' ? window.location.href : ''
-          navigator.clipboard.writeText(url).then(() => {
+          const text = typeof href === 'string' && href.trim() ? href.trim() : (typeof window !== 'undefined' ? window.location.href : '')
+          navigator.clipboard.writeText(text).then(() => {
             window.dispatchEvent(new CustomEvent('cursedbio-toast', { detail: { message: 'Copied!' } }))
           }).catch(() => {})
         }
@@ -1587,6 +1587,7 @@ function StaticContainerWithPinned({ container, pinned }: { container: PageEleme
   )
 }
 
+/** Tilt only on background; interactive content in flat layer on top so clicks/hover work. */
 function StaticContainerWithTiltAndPinned({ container, pinned }: { container: PageElement; pinned: PageElement[] }) {
   const props = container.props ?? {}
   const bf = (props.backdropFilter as string) ?? ''
@@ -1627,30 +1628,33 @@ function StaticContainerWithTiltAndPinned({ container, pinned }: { container: Pa
         transform: 'translateZ(0)',
       }}
     >
+      {/* Layer 1: Tilted background (no interactive children) */}
       <TiltContainer intensity={intensity}>
-        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-          <div style={innerStyle} />
-          {pinned.map((child) => (
-            <div
-              key={child.id}
-              data-element-id={child.id}
-              data-element-type={child.type}
-              style={{
-                position: 'absolute',
-                left: child.x,
-                top: child.y,
-                width: child.width,
-                height: child.height,
-                transform: child.rotation ? `rotate(${child.rotation}deg)` : undefined,
-                zIndex: child.zIndex,
-                opacity: (child.props.opacity as number) ?? 1,
-              }}
-            >
-              <ElementContent el={child} isEditMode={false} />
-            </div>
-          ))}
-        </div>
+        <div style={innerStyle} />
       </TiltContainer>
+      {/* Layer 2: Flat content on top - pointer-events:none so tilt gets hover; children get auto for clicks */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        {pinned.map((child) => (
+          <div
+            key={child.id}
+            data-element-id={child.id}
+            data-element-type={child.type}
+            style={{
+              position: 'absolute',
+              left: child.x,
+              top: child.y,
+              width: child.width,
+              height: child.height,
+              transform: child.rotation ? `rotate(${child.rotation}deg)` : undefined,
+              zIndex: child.zIndex,
+              opacity: (child.props.opacity as number) ?? 1,
+              pointerEvents: 'auto',
+            }}
+          >
+            <ElementContent el={child} isEditMode={false} />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
