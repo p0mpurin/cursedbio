@@ -63,7 +63,7 @@ export default function BioPageView({
   const bgType = canvas.backgroundType || 'solid'
 
   const pageBgStyle: CSSProperties = (() => {
-    const base = {
+    const base: CSSProperties = {
       width: '100%',
       height: '100%',
       minWidth: '100%',
