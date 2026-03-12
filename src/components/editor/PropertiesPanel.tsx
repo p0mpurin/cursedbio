@@ -1267,12 +1267,12 @@ export default function PropertiesPanel({
                                 onChange={(e) => prop('mouseTilt', e.target.checked)}
                                 className="accent-[var(--messmer-copper)]"
                             />
-                            <span className="text-sm text-[var(--text-muted)]">Parallax follow (view mode)</span>
+                            <span className="text-sm text-[var(--text-muted)]">3D tilt (freezes over buttons so clicks work)</span>
                         </div>
                     </Row>
                     {(element.props.mouseTilt as boolean) && (
                         <Row>
-                            <Label>Movement (px)</Label>
+                            <Label>Tilt intensity</Label>
                             <StepperField value={(element.props.tiltIntensity as number) ?? 12} min={2} max={30} onChange={(v) => prop('tiltIntensity', v)} />
                         </Row>
                     )}

@@ -660,26 +660,42 @@ function buildSnapTargets(
   return { xs: outXs, ys: outYs }
 }
 
-/** 2D mouse-follow parallax - stable (no 3D), buttons/links work. intensity: px of movement at edges. */
-function TiltContainer({ children, intensity = 12, style: outerStyle }: { children: React.ReactNode; intensity?: number; style?: React.CSSProperties }) {
+/** 3D tilt - freezes over interactive elements so clicks work. Uses double-buffering for stability. */
+const INTERACTIVE = 'a, button, [role="button"]'
+function TiltContainer({ children, intensity = 10, style: outerStyle }: { children: React.ReactNode; intensity?: number; style?: React.CSSProperties }) {
   const ref = useRef<HTMLDivElement>(null)
-  const [offset, setOffset] = useState({ x: 0, y: 0 })
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0 })
+  const overInteractive = useRef(false)
   const rafRef = useRef<number>(0)
   const onMouseMove = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement
+    const interactive = target.closest(INTERACTIVE)
+    if (interactive) {
+      if (!overInteractive.current) {
+        overInteractive.current = true
+        setTilt({ rx: 0, ry: 0 })
+      }
+      return
+    }
+    overInteractive.current = false
     const el = ref.current
     if (!el) return
     const rect = el.getBoundingClientRect()
     const nx = (e.clientX - rect.left) / rect.width - 0.5
     const ny = (e.clientY - rect.top) / rect.height - 0.5
-    const px = nx * intensity
-    const py = ny * intensity
+    const ry = nx * intensity
+    const rx = -ny * intensity
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    rafRef.current = requestAnimationFrame(() => setOffset({ x: px, y: py }))
+    rafRef.current = requestAnimationFrame(() => setTilt({ rx, ry }))
   }, [intensity])
   const onMouseLeave = useCallback(() => {
+    overInteractive.current = false
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    setOffset({ x: 0, y: 0 })
+    setTilt({ rx: 0, ry: 0 })
   }, [])
+  const transform = tilt.rx === 0 && tilt.ry === 0
+    ? 'translate3d(0,0,0)'
+    : `perspective(1000px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) translate3d(0,0,0)`
   return (
     <div
       ref={ref}
@@ -688,7 +704,7 @@ function TiltContainer({ children, intensity = 12, style: outerStyle }: { childr
       style={{
         width: '100%',
         height: '100%',
-        overflow: 'hidden',
+        perspective: 1000,
         ...outerStyle,
       }}
     >
@@ -696,8 +712,10 @@ function TiltContainer({ children, intensity = 12, style: outerStyle }: { childr
         style={{
           width: '100%',
           height: '100%',
-          transform: `translate(${offset.x}px, ${offset.y}px)`,
-          transition: offset.x === 0 && offset.y === 0 ? 'transform 0.25s ease-out' : 'transform 0.08s ease-out',
+          transform,
+          transition: tilt.rx === 0 && tilt.ry === 0 ? 'transform 0.2s ease-out' : 'transform 0.1s ease-out',
+          transformStyle: 'preserve-3d',
+          backfaceVisibility: 'hidden',
         }}
       >
         {children}
