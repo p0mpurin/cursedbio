@@ -60,21 +60,44 @@ export default function BioPageView({
   const cw = activeLayout.canvas.width
   const ch = activeLayout.canvas.height
   const canvas = activeLayout.canvas
-  const isImageBg = canvas.backgroundType === 'image' && canvas.backgroundImage
-  const pageBgStyle: CSSProperties = isImageBg
-    ? {
-        width: '100%',
-        height: '100%',
-        minWidth: '100%',
-        minHeight: '100%',
-        boxSizing: 'border-box',
+  const bgType = canvas.backgroundType || 'solid'
+
+  const pageBgStyle: CSSProperties = (() => {
+    const base = {
+      width: '100%',
+      height: '100%',
+      minWidth: '100%',
+      minHeight: '100%',
+      boxSizing: 'border-box',
+    }
+    if (bgType === 'image' && canvas.backgroundImage) {
+      return {
+        ...base,
         backgroundImage: `url(${canvas.backgroundImage})`,
         backgroundSize: 'cover',
         backgroundPosition: canvas.backgroundImagePosition || 'center',
         backgroundRepeat: 'no-repeat',
         backgroundColor: canvas.backgroundColor || '#0a0908',
       }
-    : { backgroundColor: 'var(--bg-primary)' }
+    }
+    if (bgType === 'gradient' && canvas.backgroundGradient) {
+      return {
+        ...base,
+        background: canvas.backgroundGradient,
+        backgroundColor: canvas.backgroundColor || '#0a0908',
+      }
+    }
+    if (bgType === 'video') {
+      return {
+        ...base,
+        backgroundColor: canvas.backgroundColor || '#0a0908',
+      }
+    }
+    return {
+      ...base,
+      backgroundColor: canvas.backgroundColor || 'var(--bg-primary)',
+    }
+  })()
 
   const bioContent = (
     <div

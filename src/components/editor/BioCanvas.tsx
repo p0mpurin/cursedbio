@@ -660,11 +660,12 @@ function buildSnapTargets(
   return { xs: outXs, ys: outYs }
 }
 
-/** 3D tilt effect - container reacts to mouse position */
+/** 3D tilt effect - container reacts to mouse position. Tilt is disabled over buttons/links so their hover works. */
 function TiltContainer({ children, intensity = 12, style: outerStyle }: { children: React.ReactNode; intensity?: number; style?: React.CSSProperties }) {
   const ref = useRef<HTMLDivElement>(null)
   const [transform, setTransform] = useState('')
   const onMouseMove = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('a, button')) return
     const el = ref.current
     if (!el) return
     const rect = el.getBoundingClientRect()
@@ -856,7 +857,10 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
         if (isEditMode) return
         if (clickAction === 'copy') {
           e.preventDefault()
-          navigator.clipboard.writeText(typeof window !== 'undefined' ? window.location.href : '')
+          const url = typeof window !== 'undefined' ? window.location.href : ''
+          navigator.clipboard.writeText(url).then(() => {
+            window.dispatchEvent(new CustomEvent('cursedbio-toast', { detail: { message: 'Copied!' } }))
+          }).catch(() => {})
         }
       }
       const content = clickAction === 'link' && href && !isEditMode
@@ -901,32 +905,37 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
       const maxIconPx = Math.min(el.width || 48, el.height || 48)
       const iconSize = (el.props.iconSize as number) ?? (isIconOnly ? Math.min(32, maxIconPx * 0.85) : Math.min(24, maxIconPx * 0.6))
       const hoverEffect = (el.props.iconLinkHover as string) ?? 'scale'
+      const btnBg = (el.props.backgroundColor as string) ?? '#B66E41'
+      const btnBorder = (el.props.border as string) ?? 'none'
       const sharedStyle: React.CSSProperties = {
         width: '100%',
         height: '100%',
         minWidth: '100%',
         minHeight: '100%',
         boxSizing: 'border-box',
-        backgroundColor: (el.props.backgroundColor as string) ?? '#B66E41',
+        ['--bio-btn-bg' as string]: btnBg,
+        ['--bio-btn-border' as string]: btnBorder,
         color: (el.props.color as string) ?? '#fff',
         borderRadius: (el.props.borderRadius as string) ?? '8px',
         fontSize: (el.props.fontSize as number) ?? 16,
         boxShadow: (el.props.boxShadow as string) ?? undefined,
         opacity: (el.props.opacity as number) ?? 1,
-        border: (el.props.border as string) ?? 'none',
         cursor: isEditMode ? 'default' : 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
         textDecoration: 'none',
-        transition: isEditMode ? undefined : 'transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease',
+        transition: isEditMode ? undefined : 'background 0.2s ease, border 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease',
       }
       const handleClick = (e: React.MouseEvent) => {
         if (isEditMode) return
         if (copyUrl) {
           e.preventDefault()
-          navigator.clipboard.writeText(typeof window !== 'undefined' ? window.location.href : '')
+          const url = typeof window !== 'undefined' ? window.location.href : ''
+          navigator.clipboard.writeText(url).then(() => {
+            window.dispatchEvent(new CustomEvent('cursedbio-toast', { detail: { message: 'Copied!' } }))
+          }).catch(() => {})
         }
       }
       const showLabel = !isIconOnly && (label || !icon)
@@ -1707,6 +1716,8 @@ export default function BioCanvas({
           src={c.backgroundVideo}
         />
       )}
+      {/* Button base styles from CSS vars so customCss :hover can override */}
+      <style dangerouslySetInnerHTML={{ __html: '[data-element-type="button"] a,[data-element-type="button"] button{background:var(--bio-btn-bg,#B66E41);border:var(--bio-btn-border,none);}' }} />
       {c.customCss && <style dangerouslySetInnerHTML={{ __html: c.customCss }} />}
       {showGuides && isEditMode && <CanvasGuides width={c.width} height={c.height} />}
       <div className="relative z-10 w-full h-full" style={{ isolation: 'isolate' }}>

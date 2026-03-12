@@ -9,6 +9,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { cookies } from 'next/headers'
 import { DEV_AUTH_COOKIE } from '@/lib/dev-auth'
 import NavOrSkip from '@/components/NavOrSkip'
+import CopyToast from '@/components/CopyToast'
 import './globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -41,6 +42,7 @@ export default async function RootLayout({
         <ClerkProvider>
           <NavOrSkip devAuth={devAuth} isDev={isDev} />
           <main>{children}</main>
+          <CopyToast />
         </ClerkProvider>
       </body>
     </html>
