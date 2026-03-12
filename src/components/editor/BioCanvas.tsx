@@ -1676,9 +1676,9 @@ function StaticContainerWithTiltAndPinned({ container, pinned }: { container: Pa
     ...(bf ? { isolation: 'isolate' as const, transform: 'translateZ(0)' } : {}),
   }
   const intensity = (props.tiltIntensity as number) ?? 12
+  const borderRadius = (props.borderRadius as string) ?? '0'
   return (
     <div
-      data-element-id={container.id}
       data-element-type="div"
       style={{
         position: 'absolute',
@@ -1689,11 +1689,14 @@ function StaticContainerWithTiltAndPinned({ container, pinned }: { container: Pa
         zIndex: container.zIndex ?? 1,
         isolation: 'isolate',
         transform: 'translateZ(0)',
+        overflow: 'hidden',
+        borderRadius,
       }}
     >
       <TiltContainer intensity={intensity}>
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-          <div style={innerStyle} />
+          {/* data-element-id on inner = single backdrop layer that tilts; avoids ghost from customCss on outer */}
+          <div data-element-id={container.id} data-element-type="div" style={innerStyle} />
           {pinned.map((child) => (
             <div
               key={child.id}
