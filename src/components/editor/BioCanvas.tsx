@@ -1438,7 +1438,15 @@ function CanvasGuides({ width: gw, height: gh }: { width: number; height: number
   )
 }
 
-function StaticNode({ el, layout }: { el: PageElement; layout?: PageLayout }) {
+function StaticNode({
+  el,
+  layout,
+  pointerEventsOnRoot,
+}: {
+  el: PageElement
+  layout?: PageLayout
+  pointerEventsOnRoot?: 'auto' | 'none'
+}) {
   if (el.visible === false) return null
   const isContainer = el.type === 'div'
   const isContainerWithTilt = isContainer && !!(el.props.mouseTilt as boolean)
@@ -1463,6 +1471,7 @@ function StaticNode({ el, layout }: { el: PageElement; layout?: PageLayout }) {
         transform: el.rotation ? `rotate(${el.rotation}deg)` : undefined,
         zIndex: el.zIndex,
         opacity: (el.props.opacity as number) ?? 1,
+        ...(pointerEventsOnRoot ? { pointerEvents: pointerEventsOnRoot } : {}),
       }}
     >
       <ElementContent el={el} isEditMode={false} />
@@ -1659,8 +1668,8 @@ export default function BioCanvas({
       {c.customCss && <style dangerouslySetInnerHTML={{ __html: c.customCss }} />}
       {showGuides && isEditMode && <CanvasGuides width={c.width} height={c.height} />}
       <div className="relative z-10 w-full h-full" style={{ isolation: 'isolate' }}>
-      {layout.elements.map((el) =>
-        isEditMode ? (
+      {isEditMode ? (
+        layout.elements.map((el) => (
           <InteractiveNode
             key={el.id}
             el={el}
@@ -1678,9 +1687,26 @@ export default function BioCanvas({
                 return { x, y, width: e.width, height: e.height, type: e.type }
               })}
           />
-        ) : el.pinnedTo ? null : (
-          <StaticNode key={el.id} el={el} layout={layout} />
-        )
+        ))
+      ) : (
+        <>
+          {/* Containers with pinned children (so they don't cover canvas-root elements) */}
+          {layout.elements.map((el) =>
+            el.pinnedTo ? null : (
+              (el.type === 'div' && layout.elements.some((e) => e.pinnedTo === el.id)) ? (
+                <StaticNode key={el.id} el={el} layout={layout} />
+              ) : null
+            )
+          )}
+          {/* Canvas-root layer: root elements that are not containers, so they stay above background/containers */}
+          <div style={{ position: 'absolute', inset: 0, zIndex: 1000, pointerEvents: 'none' }}>
+            {layout.elements
+              .filter((el) => !el.pinnedTo && !(el.type === 'div' && layout.elements.some((e) => e.pinnedTo === el.id)))
+              .map((el) => (
+                <StaticNode key={el.id} el={el} layout={layout} pointerEventsOnRoot="auto" />
+              ))}
+          </div>
+        </>
       )}
       </div>
     </div>

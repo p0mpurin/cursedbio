@@ -56,13 +56,21 @@ export default function BioPageView({
     ? `.bio-page-view, .bio-page-view * { cursor: url('${cursorUrl}') ${cursorX} ${cursorY}, auto; } .bio-page-view a, .bio-page-view button, .bio-page-view [role="button"] { cursor: url('${cursorUrl}') ${cursorX} ${cursorY}, pointer; }`
     : null
 
+  const cw = activeLayout.canvas.width
+  const ch = activeLayout.canvas.height
   const bioContent = (
     <div
       ref={containerRef}
       className="bio-page-root fixed inset-0 w-screen h-screen flex items-center justify-center bg-[var(--bg-primary)] overflow-auto"
     >
-      <div className="flex-shrink-0" style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
-        <BioCanvas layout={activeLayout} isEditMode={false} />
+      {/* Outer: scaled size for centering. Inner: zoom (not transform) so backdrop-filter works in Chrome */}
+      <div
+        className="flex-shrink-0 flex items-center justify-center"
+        style={{ width: cw * scale, height: ch * scale }}
+      >
+        <div style={{ width: cw, height: ch, zoom: scale }}>
+          <BioCanvas layout={activeLayout} isEditMode={false} />
+        </div>
       </div>
     </div>
   )
