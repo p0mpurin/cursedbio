@@ -6,6 +6,7 @@
  */
 import { useRef, useState } from 'react'
 import type { PageElement, PageLayout } from '@/lib/db'
+import { CONTAINER_PRESETS, BUTTON_PRESETS, TYPOGRAPHY_PRESETS, ANIMATION_SNIPPETS, addFavorite } from '@/lib/editor/presets'
 
 function CollapsibleSection({ title, children, defaultOpen = false, defaultCollapsed }: { title: string; children: React.ReactNode; defaultOpen?: boolean; defaultCollapsed?: boolean }) {
     const [open, setOpen] = useState(defaultCollapsed !== undefined ? !defaultCollapsed : defaultOpen)
@@ -465,12 +466,14 @@ export default function PropertiesPanel({
     onDelete,
     onDuplicate,
     layout,
+    onAppendPageCss,
 }: {
     element: PageElement | null
     onUpdate: (id: string, updates: Partial<PageElement>) => void
     onDelete: (id: string) => void
     onDuplicate: (id: string) => void
     layout?: PageLayout | null
+    onAppendPageCss?: (snippet: string) => void
 }) {
     if (!element) {
         return (
@@ -503,6 +506,19 @@ export default function PropertiesPanel({
             <div className="flex flex-wrap gap-2 mb-4">
                 <button type="button" onClick={() => onDuplicate(element.id)} className="py-1.5 px-2 rounded-md bg-white/5 hover:bg-white/10 text-xs text-[var(--messmer-ivory)] transition border border-white/10">Duplicate</button>
                 <button type="button" onClick={() => onDelete(element.id)} className="py-1.5 px-2 rounded-md bg-[var(--messmer-deep-crimson)]/20 hover:bg-[var(--messmer-deep-crimson)]/40 text-xs text-red-400 transition border border-red-900/30">Delete</button>
+                <button
+                    type="button"
+                    onClick={() => {
+                        const name = prompt('Save as favorite (name):', element.name ?? element.type)
+                        if (name?.trim()) {
+                            addFavorite(name.trim(), element)
+                            window.dispatchEvent(new CustomEvent('cursedbio-toast', { detail: { message: 'Added to favorites' } }))
+                        }
+                    }}
+                    className="py-1.5 px-2 rounded-md bg-white/5 hover:bg-white/10 text-xs text-[var(--messmer-ivory)] transition border border-white/10"
+                >
+                    ★ Favorites
+                </button>
                 <span className="text-[10px] text-[var(--text-muted)] self-center">Ctrl+C / Ctrl+V to copy</span>
             </div>
 
@@ -617,6 +633,23 @@ export default function PropertiesPanel({
             {/* Text-specific */}
             {element.type === 'text' && (
                 <Section title="Text">
+                    <Row>
+                        <Label>Typography preset</Label>
+                        <div className="flex flex-wrap gap-1 text-xs mb-2">
+                            {TYPOGRAPHY_PRESETS.map((t) => (
+                                <button
+                                    key={t.id}
+                                    type="button"
+                                    onClick={() => {
+                                        Object.entries(t.props).forEach(([k, v]) => prop(k, v))
+                                    }}
+                                    className="px-2 py-1 bg-white/5 hover:bg-[var(--messmer-copper)]/20 rounded border border-white/10 transition"
+                                >
+                                    {t.name}
+                                </button>
+                            ))}
+                        </div>
+                    </Row>
                     <Row>
                         <Label>Content</Label>
                         <textarea
@@ -866,6 +899,23 @@ export default function PropertiesPanel({
             {/* Button-specific */}
             {element.type === 'button' && (
                 <Section title="Button">
+                    <Row>
+                        <Label>Button preset</Label>
+                        <div className="flex flex-wrap gap-1 text-xs mb-2">
+                            {BUTTON_PRESETS.map((b) => (
+                                <button
+                                    key={b.id}
+                                    type="button"
+                                    onClick={() => {
+                                        Object.entries(b.props).forEach(([k, v]) => prop(k, String(v)))
+                                    }}
+                                    className="px-2 py-1 bg-white/5 hover:bg-[var(--messmer-copper)]/20 rounded border border-white/10 transition"
+                                >
+                                    {b.name}
+                                </button>
+                            ))}
+                        </div>
+                    </Row>
                     <Row>
                         <Label>Label</Label>
                         <Inp value={(element.props.label as string) ?? 'Click me'} onChange={(v) => prop('label', v)} />
@@ -1220,37 +1270,19 @@ export default function PropertiesPanel({
                 <Section title="Container">
                     <Row>
                         <Label>Preset</Label>
-                        <div className="flex gap-2 flex-wrap">
-                            <button
-                                type="button"
-                                onClick={() => upd({
-                                    props: {
-                                        ...element.props,
-                                        backgroundColor: 'rgba(255,255,255,0.08)',
-                                        backdropFilter: 'blur(12px)',
-                                        border: '1px solid rgba(255,255,255,0.12)',
-                                        borderRadius: '16px',
-                                    },
-                                })}
-                                className="px-2 py-1.5 rounded text-xs bg-white/5 hover:bg-[var(--messmer-copper)]/20 border border-white/10"
-                            >
-                                Glass
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => upd({
-                                    props: {
-                                        ...element.props,
-                                        backgroundColor: 'rgba(0,0,0,0.4)',
-                                        backdropFilter: 'blur(16px) brightness(0.8)',
-                                        border: '1px solid rgba(255,255,255,0.08)',
-                                        borderRadius: '24px',
-                                    },
-                                })}
-                                className="px-2 py-1.5 rounded text-xs bg-white/5 hover:bg-[var(--messmer-copper)]/20 border border-white/10"
-                            >
-                                Frosted
-                            </button>
+                        <div className="flex flex-wrap gap-1 text-xs">
+                            {CONTAINER_PRESETS.map((p) => (
+                                <button
+                                    key={p.id}
+                                    type="button"
+                                    onClick={() => upd({
+                                        props: { ...element.props, ...p.props },
+                                    })}
+                                    className="px-2 py-1.5 bg-white/5 hover:bg-[var(--messmer-copper)]/20 rounded border border-white/10 transition"
+                                >
+                                    {p.name}
+                                </button>
+                            ))}
                         </div>
                     </Row>
                     <Row>
@@ -1355,6 +1387,29 @@ export default function PropertiesPanel({
                         value={(element.props.boxShadow as string) ?? ''}
                         onChange={(v) => prop('boxShadow', v)}
                     />
+                </Section>
+            )}
+
+            {/* Animation presets — appends to page CSS */}
+            {onAppendPageCss && (
+                <Section title="Animation preset">
+                    <p className="text-[10px] text-[var(--text-muted)] mb-2">Add animation to this element via page CSS</p>
+                    <div className="flex flex-wrap gap-1 text-xs">
+                        {ANIMATION_SNIPPETS.map((a) => (
+                            <button
+                                key={a.id}
+                                type="button"
+                                onClick={() => {
+                                    const css = a.css.replace(/\{\{id\}\}/g, element.id)
+                                    onAppendPageCss(css)
+                                    window.dispatchEvent(new CustomEvent('cursedbio-toast', { detail: { message: `Added ${a.name}` } }))
+                                }}
+                                className="px-2 py-1 bg-white/5 hover:bg-[var(--messmer-copper)]/20 rounded border border-white/10 transition"
+                            >
+                                {a.name}
+                            </button>
+                        ))}
+                    </div>
                 </Section>
             )}
         </div>

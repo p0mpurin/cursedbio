@@ -210,6 +210,14 @@ export default function EditorPage() {
     setEffectiveLayout((prev) => ({ ...prev, canvas: { ...prev.canvas, ...updates } }))
   }, [setEffectiveLayout])
 
+  const handleAppendPageCss = useCallback((snippet: string) => {
+    setEffectiveLayout((prev) => {
+      const cur = prev.canvas.customCss || ''
+      const next = cur ? `${cur}\n\n${snippet}` : snippet
+      return { ...prev, canvas: { ...prev.canvas, customCss: next } }
+    })
+  }, [setEffectiveLayout])
+
   const handleFitZoom = useCallback(() => {
     if (!mainRef.current) return
     const rect = mainRef.current.getBoundingClientRect()
@@ -402,6 +410,7 @@ export default function EditorPage() {
                 onDelete={handleDeleteElement}
                 onDuplicate={handleDuplicateElement}
                 layout={effectiveLayout}
+                onAppendPageCss={handleAppendPageCss}
               />
             ) : (
               <PageSettingsPanel

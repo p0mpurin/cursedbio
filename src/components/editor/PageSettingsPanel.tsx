@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PageLayout, ResponsivePageLayout } from '@/lib/db'
 import { isResponsiveLayout } from '@/lib/responsive-layout'
+import { THEME_PRESETS, CSS_SNIPPETS } from '@/lib/editor/presets'
 
 function Label({ children }: { children: React.ReactNode }) {
     return (
@@ -191,6 +192,25 @@ export default function PageSettingsPanel({
                     <button onClick={() => handlePreset(768, 1024)} className="px-2 py-1 bg-white/5 hover:bg-white/10 rounded border border-white/10 transition">Tablet</button>
                     <button onClick={() => handlePreset(390, 844)} className="px-2 py-1 bg-white/5 hover:bg-white/10 rounded border border-white/10 transition">Phone</button>
                     <button onClick={() => handlePreset(globalThis.innerWidth ?? 1920, globalThis.innerHeight ?? 1080)} className="px-2 py-1 bg-[var(--messmer-copper)]/20 hover:bg-[var(--messmer-copper)]/30 rounded border border-[var(--messmer-copper)]/40 transition text-[var(--messmer-copper)]">Viewport</button>
+                </div>
+            </Section>
+
+            <Section title="Theme presets">
+                <p className="text-[10px] text-[var(--text-muted)] mb-2">Quick apply background color + gradient</p>
+                <div className="flex flex-wrap gap-1 text-xs">
+                    {THEME_PRESETS.map((t) => (
+                        <button
+                            key={t.id}
+                            onClick={() => onUpdate({
+                                backgroundType: 'gradient',
+                                backgroundColor: t.bg,
+                                backgroundGradient: t.gradient,
+                            })}
+                            className="px-2 py-1.5 bg-white/5 hover:bg-white/10 rounded border border-white/10 transition"
+                        >
+                            {t.name}
+                        </button>
+                    ))}
                 </div>
             </Section>
 
@@ -407,6 +427,43 @@ export default function PageSettingsPanel({
                 )}
             </Section>
 
+            <Section title="Export / Import">
+                <div className="flex flex-wrap gap-2 mb-2">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            navigator.clipboard.writeText(JSON.stringify(layout, null, 2))
+                            window.dispatchEvent(new CustomEvent('cursedbio-toast', { detail: { message: 'Layout copied to clipboard' } }))
+                        }}
+                        className="px-3 py-1.5 rounded text-xs bg-white/5 hover:bg-[var(--messmer-copper)]/20 border border-white/10 transition"
+                    >
+                        Copy JSON
+                    </button>
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            try {
+                                const text = await navigator.clipboard.readText()
+                                const parsed = JSON.parse(text)
+                                if (isValidLayout(parsed)) {
+                                    onUpdateLayout?.(parsed)
+                                    setPageSourceJson(JSON.stringify(parsed, null, 2))
+                                    setPageSourceError(null)
+                                    window.dispatchEvent(new CustomEvent('cursedbio-toast', { detail: { message: 'Layout imported from clipboard' } }))
+                                } else {
+                                    setPageSourceError('Invalid layout structure')
+                                }
+                            } catch {
+                                setPageSourceError('Invalid JSON in clipboard')
+                            }
+                        }}
+                        className="px-3 py-1.5 rounded text-xs bg-white/5 hover:bg-[var(--messmer-copper)]/20 border border-white/10 transition"
+                    >
+                        Import from clipboard
+                    </button>
+                </div>
+            </Section>
+
             <Section title="Advanced — Page source">
                 <Row>
                     <Label>Layout & elements (JSON)</Label>
@@ -431,6 +488,29 @@ export default function PageSettingsPanel({
                     <p className="text-[10px] text-[var(--text-muted)] mb-1">
                         Applied to the bio page and editor preview.
                     </p>
+                    <div className="flex gap-2 mb-2">
+                        <select
+                            value=""
+                            onChange={(e) => {
+                                const v = e.target.value
+                                if (v) {
+                                    const snip = CSS_SNIPPETS.find((s) => s.id === v)
+                                    if (snip) {
+                                        const cur = c.customCss || ''
+                                        const next = cur ? `${cur}\n\n${snip.css}` : snip.css
+                                        onUpdate({ customCss: next })
+                                        e.target.value = ''
+                                    }
+                                }
+                            }}
+                            className="flex-1 bg-white/5 border border-white/10 rounded-md px-2 py-1.5 text-xs text-[var(--messmer-ivory)] focus:outline-none focus:border-[var(--messmer-copper)]/60"
+                        >
+                            <option value="">Insert snippet…</option>
+                            {CSS_SNIPPETS.map((s) => (
+                                <option key={s.id} value={s.id}>{s.name}</option>
+                            ))}
+                        </select>
+                    </div>
                     <textarea
                         value={c.customCss || ''}
                         onChange={(e) => onUpdate({ customCss: e.target.value })}

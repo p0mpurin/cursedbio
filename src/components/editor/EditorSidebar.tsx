@@ -3,9 +3,10 @@
 /**
  * EditorSidebar - Left panel with Elements and Graph (hierarchy) tabs
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { PageElement } from '@/lib/db'
 import HierarchyGraph from './HierarchyGraph'
+import { getFavorites, removeFavorite, type FavoriteElement } from '@/lib/editor/presets'
 
 /** Primary elements - shown first, most commonly used */
 const PRIMARY_ELEMENTS: Array<{ label: string; icon: string; template: Omit<PageElement, 'id'> }> = [
@@ -175,6 +176,14 @@ export default function EditorSidebar({
 }) {
   const [activeTab, setActiveTab] = useState<'elements' | 'graph'>('elements')
   const [showMore, setShowMore] = useState(false)
+  const [favorites, setFavorites] = useState<FavoriteElement[]>([])
+
+  useEffect(() => {
+    const load = () => setFavorites(getFavorites())
+    load()
+    window.addEventListener('cursedbio-favorites-updated', load)
+    return () => window.removeEventListener('cursedbio-favorites-updated', load)
+  }, [])
 
   const mainContainer = elements.find((e) => e.type === 'div' && e.id === 'main')
   const addElement = (template: Omit<PageElement, 'id'>) => {
@@ -226,6 +235,33 @@ export default function EditorSidebar({
                 </button>
               ))}
             </div>
+            {favorites.length > 0 && (
+              <div className="mb-4">
+                <p className="text-xs text-[var(--text-muted)] mb-2">Favorites</p>
+                <div className="space-y-2">
+                  {favorites.map((fav, i) => (
+                    <div key={i} className="flex items-center gap-2 group">
+                      <button
+                        type="button"
+                        onClick={() => addElement(fav.template as Omit<PageElement, 'id'>)}
+                        className="flex-1 flex items-center gap-3 p-3 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-left text-sm transition border border-amber-500/20"
+                      >
+                        <span className="text-amber-400">★</span>
+                        <span className="text-[var(--text-primary)] truncate">{fav.name}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeFavorite(i)}
+                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded text-red-400 hover:bg-red-500/20 transition"
+                        title="Remove from favorites"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div>
               <button
                 type="button"
