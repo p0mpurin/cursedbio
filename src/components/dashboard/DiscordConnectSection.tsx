@@ -34,7 +34,7 @@ export default function DiscordConnectSection({ discord }: DiscordConnectSection
     }
   }
 
-  if (connected) {
+  if (connected && discord) {
     return (
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-3">
