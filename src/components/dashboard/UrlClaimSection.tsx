@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-const MAX_FREE_URL_CHANGES = 3
+const MAX_FREE_URL_CHANGES: number = 3
 
 type UrlClaimSectionProps = {
   currentSlug: string
