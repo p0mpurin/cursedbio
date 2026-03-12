@@ -13,6 +13,9 @@ export async function POST(req: Request) {
   if (!userId && !devAuth) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+  if (!userId) {
+    return NextResponse.json({ error: 'Discord disconnect requires Clerk auth' }, { status: 401 })
+  }
 
   try {
     const client = await clerkClient()
