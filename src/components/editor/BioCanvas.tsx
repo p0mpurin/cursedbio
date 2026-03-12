@@ -660,12 +660,16 @@ function buildSnapTargets(
   return { xs: outXs, ys: outYs }
 }
 
-/** 3D tilt effect - container reacts to mouse position. Tilt is disabled over buttons/links so their hover works. */
+/** 3D tilt effect - container reacts to mouse position. Tilt is reset over interactive elements so hover/click work. */
+const INTERACTIVE_SELECTOR = 'a, button, [role="button"]'
 function TiltContainer({ children, intensity = 12, style: outerStyle }: { children: React.ReactNode; intensity?: number; style?: React.CSSProperties }) {
   const ref = useRef<HTMLDivElement>(null)
   const [transform, setTransform] = useState('')
   const onMouseMove = useCallback((e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('a, button')) return
+    if ((e.target as HTMLElement).closest(INTERACTIVE_SELECTOR)) {
+      setTransform('')
+      return
+    }
     const el = ref.current
     if (!el) return
     const rect = el.getBoundingClientRect()
