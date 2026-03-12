@@ -307,7 +307,8 @@ export default function EditorPage() {
             {!isDevAuthMode && <UserButton afterSignOutUrl="/" />}
             <button
               onClick={() => {
-                localStorage.setItem('cursedbio-preview-layout', JSON.stringify(layout))
+                const toPreview = isResponsiveLayout(layout) ? getEditableLayout(layout, activeVariant) : layout
+                localStorage.setItem('cursedbio-preview-layout', JSON.stringify(toPreview))
                 window.open('/preview', '_blank', 'noopener')
               }}
               className="px-4 py-1.5 rounded-md text-sm font-semibold border border-[var(--messmer-copper)]/30 text-[var(--messmer-copper)] hover:bg-[var(--messmer-copper)] hover:text-white transition"

@@ -1481,25 +1481,28 @@ function StaticNode({
 
 /** Simple container that renders its pinned children (no tilt). Used for main content area. */
 function StaticContainerWithPinned({ container, pinned }: { container: PageElement; pinned: PageElement[] }) {
-  const bf = (container.props.backdropFilter as string) ?? ''
-  const bg = (container.props.backgroundColor as string) ?? 'transparent'
+  const props = container.props ?? {}
+  const bf = (props.backdropFilter as string) ?? ''
+  const bg = (props.backgroundColor as string) ?? 'transparent'
   const isOpaque = !bg || bg === 'transparent' || bg === 'rgba(0,0,0,0)' || /^#[0-9a-fA-F]{6}$/.test(bg) || /^#[0-9a-fA-F]{8}$/.test(bg)
-  const effectiveBg = bf && isOpaque ? 'rgba(255,255,255,0.08)' : bg
+  let effectiveBg = bf && isOpaque ? 'rgba(255,255,255,0.08)' : bg
+  if (effectiveBg === 'transparent' && !bf) effectiveBg = 'rgba(255,255,255,0.04)'
 
   const innerStyle: React.CSSProperties = {
     position: 'absolute',
     inset: 0,
     backgroundColor: effectiveBg,
-    background: (container.props.background as string) || undefined,
-    backgroundImage: (container.props.backgroundImage as string) ? `url(${container.props.backgroundImage})` : undefined,
-    backgroundSize: (container.props.backgroundSize as string) ?? 'cover',
-    backgroundPosition: (container.props.backgroundPosition as string) ?? 'center',
-    borderRadius: (container.props.borderRadius as string) ?? '0',
-    border: (container.props.border as string) ?? undefined,
-    boxShadow: (container.props.boxShadow as string) ?? undefined,
+    background: (props.background as string) || undefined,
+    backgroundImage: (props.backgroundImage as string) ? `url(${props.backgroundImage})` : undefined,
+    backgroundSize: (props.backgroundSize as string) ?? 'cover',
+    backgroundPosition: (props.backgroundPosition as string) ?? 'center',
+    backgroundRepeat: 'no-repeat',
+    borderRadius: (props.borderRadius as string) ?? '0',
+    border: (props.border as string) ?? undefined,
+    boxShadow: (props.boxShadow as string) ?? undefined,
     backdropFilter: bf || undefined,
     WebkitBackdropFilter: bf || undefined,
-    opacity: (container.props.opacity as number) ?? 1,
+    opacity: (props.opacity as number) ?? 1,
     ...(bf ? { isolation: 'isolate' as const, transform: 'translateZ(0)' } : {}),
   }
   return (
@@ -1512,7 +1515,9 @@ function StaticContainerWithPinned({ container, pinned }: { container: PageEleme
         top: container.y,
         width: container.width,
         height: container.height,
-        zIndex: container.zIndex,
+        zIndex: container.zIndex ?? 1,
+        isolation: 'isolate',
+        transform: 'translateZ(0)',
       }}
     >
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -1542,26 +1547,30 @@ function StaticContainerWithPinned({ container, pinned }: { container: PageEleme
 }
 
 function StaticContainerWithTiltAndPinned({ container, pinned }: { container: PageElement; pinned: PageElement[] }) {
-  const bf = (container.props.backdropFilter as string) ?? ''
-  const bg = (container.props.backgroundColor as string) ?? 'transparent'
+  const props = container.props ?? {}
+  const bf = (props.backdropFilter as string) ?? ''
+  const bg = (props.backgroundColor as string) ?? 'transparent'
   const isOpaque = !bg || bg === 'transparent' || bg === 'rgba(0,0,0,0)' || /^#[0-9a-fA-F]{6}$/.test(bg) || /^#[0-9a-fA-F]{8}$/.test(bg)
-  const effectiveBg = bf && isOpaque ? 'rgba(255,255,255,0.08)' : bg
+  let effectiveBg = bf && isOpaque ? 'rgba(255,255,255,0.08)' : bg
+  if (effectiveBg === 'transparent' && !bf) effectiveBg = 'rgba(255,255,255,0.04)'
+
   const innerStyle: React.CSSProperties = {
     position: 'absolute', inset: 0,
     backgroundColor: effectiveBg,
-    background: (container.props.background as string) ?? undefined,
-    backgroundImage: (container.props.backgroundImage as string) ? `url(${container.props.backgroundImage})` : undefined,
-    backgroundSize: (container.props.backgroundSize as string) ?? 'cover',
-    backgroundPosition: (container.props.backgroundPosition as string) ?? 'center',
-    borderRadius: (container.props.borderRadius as string) ?? '0',
-    border: (container.props.border as string) ?? undefined,
-    boxShadow: (container.props.boxShadow as string) ?? undefined,
+    background: (props.background as string) ?? undefined,
+    backgroundImage: (props.backgroundImage as string) ? `url(${props.backgroundImage})` : undefined,
+    backgroundSize: (props.backgroundSize as string) ?? 'cover',
+    backgroundPosition: (props.backgroundPosition as string) ?? 'center',
+    backgroundRepeat: 'no-repeat',
+    borderRadius: (props.borderRadius as string) ?? '0',
+    border: (props.border as string) ?? undefined,
+    boxShadow: (props.boxShadow as string) ?? undefined,
     backdropFilter: bf || undefined,
     WebkitBackdropFilter: bf || undefined,
-    opacity: (container.props.opacity as number) ?? 1,
+    opacity: (props.opacity as number) ?? 1,
     ...(bf ? { isolation: 'isolate' as const, transform: 'translateZ(0)' } : {}),
   }
-  const intensity = (container.props.tiltIntensity as number) ?? 12
+  const intensity = (props.tiltIntensity as number) ?? 12
   return (
     <div
       data-element-id={container.id}
@@ -1572,7 +1581,9 @@ function StaticContainerWithTiltAndPinned({ container, pinned }: { container: Pa
         top: container.y,
         width: container.width,
         height: container.height,
-        zIndex: container.zIndex,
+        zIndex: container.zIndex ?? 1,
+        isolation: 'isolate',
+        transform: 'translateZ(0)',
       }}
     >
       <TiltContainer intensity={intensity}>
@@ -1622,13 +1633,16 @@ export default function BioCanvas({
 }) {
   const c = layout.canvas
 
+  const bgSize = c.backgroundImageSize || 'cover'
   const bgStyle: React.CSSProperties = c.backgroundType === 'gradient'
     ? { backgroundImage: c.backgroundGradient }
     : c.backgroundType === 'image' && c.backgroundImage
       ? {
           backgroundImage: `url(${c.backgroundImage})`,
-          backgroundSize: c.backgroundImageSize || 'cover',
+          backgroundSize: bgSize === 'fill' ? '100% 100%' : bgSize,
           backgroundPosition: c.backgroundImagePosition || 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundColor: c.backgroundColor || '#0a0908',
         }
       : { backgroundColor: c.backgroundColor || '#0a0908' }
 

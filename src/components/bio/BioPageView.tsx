@@ -5,6 +5,7 @@
  * Supports click-to-enter for audio autoplay (browsers require user gesture for unmuted audio).
  */
 import { useRef, useEffect, useState } from 'react'
+import type { CSSProperties } from 'react'
 import BioCanvas from '@/components/editor/BioCanvas'
 import { getLayoutForViewport } from '@/lib/responsive-layout'
 import type { PageLayout, ResponsivePageLayout } from '@/lib/db'
@@ -58,10 +59,23 @@ export default function BioPageView({
 
   const cw = activeLayout.canvas.width
   const ch = activeLayout.canvas.height
+  const canvas = activeLayout.canvas
+  const isImageBg = canvas.backgroundType === 'image' && canvas.backgroundImage
+  const pageBgStyle: CSSProperties = isImageBg
+    ? {
+        backgroundImage: `url(${canvas.backgroundImage})`,
+        backgroundSize: (canvas.backgroundImageSize || 'cover') === 'fill' ? '100% 100%' : (canvas.backgroundImageSize || 'cover'),
+        backgroundPosition: canvas.backgroundImagePosition || 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundColor: canvas.backgroundColor || '#0a0908',
+      }
+    : { backgroundColor: 'var(--bg-primary)' }
+
   const bioContent = (
     <div
       ref={containerRef}
-      className="bio-page-root fixed inset-0 w-screen h-screen flex items-center justify-center bg-[var(--bg-primary)] overflow-auto"
+      className="bio-page-root fixed inset-0 w-screen h-screen flex items-center justify-center overflow-auto"
+      style={pageBgStyle}
     >
       {/* Outer: scaled size for centering. Inner: zoom (not transform) so backdrop-filter works in Chrome */}
       <div
