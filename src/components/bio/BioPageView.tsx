@@ -35,13 +35,11 @@ export default function BioPageView({
   useEffect(() => {
     const updateLayoutAndScale = () => {
       const vw = window.innerWidth
-      const vh = window.innerHeight
       const resolved = getLayoutForViewport(layout, vw)
       setActiveLayout(resolved)
-      if (!containerRef.current) return
       const cw = resolved.canvas.width
-      const ch = resolved.canvas.height
-      const s = Math.min(vw / cw, vh / ch)
+      // Scale to fill viewport width so canvas spans edge-to-edge (no side bars)
+      const s = vw / cw
       setScale(s)
     }
     updateLayoutAndScale()
@@ -102,12 +100,12 @@ export default function BioPageView({
   const bioContent = (
     <div
       ref={containerRef}
-      className="bio-page-root fixed inset-0 w-screen h-screen flex items-center justify-center overflow-auto"
+      className="bio-page-root fixed inset-0 w-screen h-screen flex items-start justify-center overflow-auto"
       style={pageBgStyle}
     >
-      {/* Outer: scaled size for centering. Inner: zoom (not transform) so backdrop-filter works in Chrome */}
+      {/* Outer: scaled size. Inner: zoom (not transform) so backdrop-filter works in Chrome */}
       <div
-        className="flex-shrink-0 flex items-center justify-center"
+        className="flex-shrink-0"
         style={{ width: cw * scale, height: ch * scale }}
       >
         <div style={{ width: cw, height: ch, zoom: scale }}>

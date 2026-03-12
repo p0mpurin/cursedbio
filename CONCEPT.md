@@ -61,7 +61,7 @@ A social-bio platform that combines three influences:
 
 ### Bio View
 
-- Route: `/b/[username]`
+- Route: `/[username]` (public bio page)
 - Loads page by `username` (via profile slug).
 - Renders `BioCanvas` in view mode; supports `custom_css` and `custom_js` injection.
 

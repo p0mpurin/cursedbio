@@ -12,6 +12,7 @@ import EditorSidebar from '@/components/editor/EditorSidebar'
 import PropertiesPanel from '@/components/editor/PropertiesPanel'
 import PageSettingsPanel from '@/components/editor/PageSettingsPanel'
 import { getEditableLayout, isResponsiveLayout, updateLayoutWithCascade } from '@/lib/responsive-layout'
+import { getTemplate } from '@/lib/editor/templates'
 import type { PageElement, PageLayout, ResponsivePageLayout } from '@/lib/db'
 
 /** Default: desktop-sized canvas with a single container. Users add elements inside it. */
@@ -76,6 +77,13 @@ export default function EditorPage() {
 
   const getInitialLayout = useCallback((): PageLayout | ResponsivePageLayout => {
     if (typeof window !== 'undefined') {
+      // ?template= takes priority for TemplateGallery links
+      const params = new URLSearchParams(window.location.search)
+      const templateId = params.get('template')
+      if (templateId) {
+        const t = getTemplate(templateId)
+        if (t) return t
+      }
       const raw = localStorage.getItem('cursedbio-editor-layout')
       if (raw) {
         try {
@@ -255,8 +263,11 @@ export default function EditorPage() {
         const err = await res.json().catch(() => ({}))
         throw new Error(err.error ?? res.statusText)
       }
+      window.dispatchEvent(new CustomEvent('cursedbio-toast', { detail: { message: 'Saved!' } }))
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to save')
+      const msg = e instanceof Error ? e.message : 'Failed to save'
+      setError(msg)
+      window.dispatchEvent(new CustomEvent('cursedbio-toast', { detail: { message: msg } }))
     } finally {
       setTimeout(() => setSaving(false), 800) // fake delay for UI feedback
     }

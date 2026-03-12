@@ -39,23 +39,6 @@ export type ResponsivePageLayout = {
   mobile: PageLayout
 }
 
-/** Legacy single layout (version 2). Treated as mobile-only for responsive. */
-export function isResponsiveLayout(l: PageLayout | ResponsivePageLayout): l is ResponsivePageLayout {
-  return 'desktop' in l && 'mobile' in l
-}
-
-/** Get the layout to render based on viewport width. */
-export function getLayoutForViewport(
-  layout: PageLayout | ResponsivePageLayout,
-  viewportWidth: number
-): PageLayout {
-  if (isResponsiveLayout(layout)) {
-    const bp = layout.breakpoint ?? 768
-    return viewportWidth >= bp ? layout.desktop : layout.mobile
-  }
-  return layout
-}
-
 /** Page row type - layout_json matches PageLayout or ResponsivePageLayout */
 export type Page = {
   id: string

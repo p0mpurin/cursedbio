@@ -1,6 +1,6 @@
 /**
  * POST /api/upload - Upload a file; returns public URL.
- * Saves to public/uploads/ so the file is served at /uploads/filename
+ * Saves to Supabase Storage (uploads bucket) and returns the public URL.
  */
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/db'

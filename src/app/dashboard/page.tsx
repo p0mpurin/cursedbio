@@ -11,7 +11,9 @@ import { supabaseAdmin } from '@/lib/db'
 import ProfileInfoCard from '@/components/dashboard/ProfileInfoCard'
 import DiscordConnectSection from '@/components/dashboard/DiscordConnectSection'
 import SimpleLayoutsSection from '@/components/dashboard/SimpleLayoutsSection'
+import TemplateGallery from '@/components/dashboard/TemplateGallery'
 import UrlClaimSection from '@/components/dashboard/UrlClaimSection'
+import { TEMPLATES } from '@/lib/editor/templates'
 
 export default async function DashboardPage() {
   unstable_noStore() // Ensure fresh user data (e.g. after Discord disconnect)
@@ -79,6 +81,15 @@ export default async function DashboardPage() {
         {/* Simple layouts - pick one and fill in your info */}
         <section className="mb-12">
           <SimpleLayoutsSection defaultUsername={username} defaultDisplayName={displayName} />
+        </section>
+
+        {/* Quick templates - one-click to open editor with template */}
+        <section className="mb-12">
+          <h2 className="text-sm font-semibold text-[var(--accent-blue-soft)] uppercase tracking-wider mb-3">Quick templates</h2>
+          <p className="text-sm text-[var(--text-muted)] mb-4">
+            Start from a template and customize in the editor.
+          </p>
+          <TemplateGallery templates={TEMPLATES} />
         </section>
 
         {/* Your Info - editable profile data for the editor */}
