@@ -762,7 +762,9 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
   switch (el.type) {
     case 'text': {
       const content = (el.props.content as string) ?? ''
-      const textEffect = (el.props.textEffect as string) ?? 'none'
+      const legacyEffect = (el.props.textEffect as string) ?? 'none'
+      const effectsArray = (el.props.textEffects as string[]) ?? (legacyEffect !== 'none' ? [legacyEffect] : [])
+      
       const baseStyle: React.CSSProperties = {
         width: '100%', height: '100%',
         fontSize: (el.props.fontSize as number) ?? 16,
@@ -777,29 +779,43 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
         opacity: (el.props.opacity as number) ?? 1,
         overflow: 'hidden',
       }
-      const effectStyle = !isEditMode && textEffect === 'fade'
-        ? { animation: 'textFadeIn 0.8s ease-out forwards' }
-        : !isEditMode && textEffect === 'glitch'
-          ? { animation: 'textGlitch 2s ease-in-out infinite' }
-          : !isEditMode && textEffect === 'glow'
-            ? { animation: 'textGlow 2s ease-in-out infinite' }
-            : !isEditMode && textEffect === 'glowParticles'
-              ? { animation: 'textGlow 2.5s ease-in-out infinite' }
-              : {}
-      const effectClass = !isEditMode && textEffect === 'glowParticles' ? 'text-effect-glow-particles' : ''
+      
+      let animations: string[] = []
+      if (!isEditMode) {
+        if (effectsArray.includes('fade')) animations.push('textFadeIn 0.8s ease-out forwards')
+        if (effectsArray.includes('glitch')) animations.push('textGlitch 2s ease-in-out infinite')
+        if (effectsArray.includes('glow')) animations.push('textGlow 2s ease-in-out infinite')
+        if (effectsArray.includes('glowParticles')) animations.push('textGlow 2.5s ease-in-out infinite')
+      }
+
+      const effectStyle: React.CSSProperties = animations.length > 0
+        ? { animation: animations.join(', ') }
+        : {}
+
+      const hasParticles = !isEditMode && effectsArray.includes('glowParticles')
+      const effectClass = hasParticles ? 'text-effect-glow-particles' : ''
+      
+      // If we have particles, wrap the content in an inline-block span to tightly fit the text dimensions instead of expanding to the container boundaries
+      const innerContent = effectsArray.includes('typewriter') && !isEditMode ? (
+        <TypewriterText
+          text={content}
+          speed={(el.props.typewriterSpeed as number) ?? 80}
+          deleteSpeed={(el.props.typewriterDeleteSpeed as number) ?? undefined}
+          pauseAtEnd={(el.props.typewriterPauseAtEnd as number) ?? 1500}
+          loop={(el.props.typewriterLoop as boolean) !== false}
+        />
+      ) : (
+        content
+      )
+
       return (
-        <div style={{ ...baseStyle, ...effectStyle }} className={effectClass}>
-          {!isEditMode && textEffect === 'typewriter' ? (
-            <TypewriterText
-              text={content}
-              speed={(el.props.typewriterSpeed as number) ?? 80}
-              deleteSpeed={(el.props.typewriterDeleteSpeed as number) ?? undefined}
-              pauseAtEnd={(el.props.typewriterPauseAtEnd as number) ?? 1500}
-              loop={(el.props.typewriterLoop as boolean) !== false}
-              {...baseStyle}
-            />
+        <div style={{ ...baseStyle, ...effectStyle }}>
+          {hasParticles ? (
+            <span style={{ display: 'inline-block', position: 'relative' }} className={effectClass}>
+              {innerContent}
+            </span>
           ) : (
-            content
+            innerContent
           )}
         </div>
       )

@@ -692,20 +692,46 @@ export default function PropertiesPanel({
                             onChange={(v) => prop('webkitTextStroke', v)}
                         />
                     </Row>
-                    <SelectRow
-                        label="Text Effect"
-                        value={(element.props.textEffect as string) ?? 'none'}
-                        options={[
-                            { value: 'none', label: 'None' },
-                            { value: 'typewriter', label: 'Typewriter' },
-                            { value: 'fade', label: 'Fade In' },
-                            { value: 'glitch', label: 'Glitch' },
-                            { value: 'glow', label: 'Glow' },
-                            { value: 'glowParticles', label: 'Glow + Particles' },
-                        ]}
-                        onChange={(v) => prop('textEffect', v)}
-                    />
-                    {(element.props.textEffect as string) === 'typewriter' && (
+                    <Row>
+                        <Label>Text Effects</Label>
+                        <div className="flex flex-col gap-2 mt-1">
+                            {[
+                                { value: 'typewriter', label: 'Typewriter' },
+                                { value: 'fade', label: 'Fade In' },
+                                { value: 'glitch', label: 'Glitch' },
+                                { value: 'glow', label: 'Glow' },
+                                { value: 'glowParticles', label: 'Glow + Particles' },
+                            ].map((effect) => {
+                                // Default to legacy `textEffect` string if `textEffects` array doesn't exist
+                                const legacyEffect = element.props.textEffect as string
+                                const effectsArray = (element.props.textEffects as string[]) ?? (legacyEffect && legacyEffect !== 'none' ? [legacyEffect] : [])
+                                const isChecked = effectsArray.includes(effect.value)
+
+                                return (
+                                    <label key={effect.value} className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={isChecked}
+                                            onChange={(e) => {
+                                                let newEffects = [...effectsArray]
+                                                if (e.target.checked) {
+                                                    newEffects.push(effect.value)
+                                                } else {
+                                                    newEffects = newEffects.filter((v) => v !== effect.value)
+                                                }
+                                                // Clear legacy field when using new array
+                                                prop('textEffect', undefined)
+                                                prop('textEffects', newEffects)
+                                            }}
+                                            className="accent-[var(--messmer-copper)]"
+                                        />
+                                        <span className="text-sm text-[var(--messmer-ivory)]">{effect.label}</span>
+                                    </label>
+                                )
+                            })}
+                        </div>
+                    </Row>
+                    {((element.props.textEffects as string[])?.includes('typewriter') || (element.props.textEffect === 'typewriter')) && (
                         <>
                             <Row>
                                 <Label>Type Speed (ms/char)</Label>

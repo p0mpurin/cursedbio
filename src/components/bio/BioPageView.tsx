@@ -99,12 +99,6 @@ export default function BioPageView({
             <span className="text-sm text-[var(--text-muted)]">{enterSubtitle}</span>
           </div>
         </button>
-        <a
-          href="/"
-          className="fixed bottom-4 left-4 text-xs text-[var(--text-muted)]/60 hover:text-[var(--messmer-copper)] transition z-[11]"
-        >
-          home
-        </a>
         {customJs && <script dangerouslySetInnerHTML={{ __html: customJs }} />}
       </div>
     )
@@ -115,12 +109,6 @@ export default function BioPageView({
       {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
       {cursorCss && <style dangerouslySetInnerHTML={{ __html: cursorCss }} />}
       {bioContent}
-      <a
-        href="/"
-        className="fixed bottom-4 left-4 text-xs text-[var(--text-muted)]/60 hover:text-[var(--messmer-copper)] transition z-10"
-      >
-        home
-      </a>
       {customJs && <script dangerouslySetInnerHTML={{ __html: customJs }} />}
     </div>
   )
