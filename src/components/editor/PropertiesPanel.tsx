@@ -912,7 +912,12 @@ export default function PropertiesPanel({
                     )}
                     <Row>
                         <Label>Link URL</Label>
-                        <Inp value={(element.props.href as string) ?? ''} placeholder="https://... (leave empty for copy)" onChange={(v) => prop('href', v)} />
+                        <div className="space-y-1">
+                            <Inp value={(element.props.href as string) ?? ''} placeholder="https://... (leave empty for copy)" onChange={(v) => prop('href', v)} />
+                            {(element.props.href as string) && (
+                                <p className="text-[10px] text-[var(--text-muted)]">In editor: Ctrl+Click (Cmd+Click on Mac) to open link. In preview/live, normal click works.</p>
+                            )}
+                        </div>
                     </Row>
                     <Row>
                         <Label>Copy URL to clipboard</Label>

@@ -902,7 +902,11 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
       const iconSize = (el.props.iconSize as number) ?? (isIconOnly ? Math.min(32, maxIconPx * 0.85) : Math.min(24, maxIconPx * 0.6))
       const hoverEffect = (el.props.iconLinkHover as string) ?? 'scale'
       const sharedStyle: React.CSSProperties = {
-        width: '100%', height: '100%',
+        width: '100%',
+        height: '100%',
+        minWidth: '100%',
+        minHeight: '100%',
+        boxSizing: 'border-box',
         backgroundColor: (el.props.backgroundColor as string) ?? '#B66E41',
         color: (el.props.color as string) ?? '#fff',
         borderRadius: (el.props.borderRadius as string) ?? '8px',
@@ -911,8 +915,11 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
         opacity: (el.props.opacity as number) ?? 1,
         border: (el.props.border as string) ?? 'none',
         cursor: isEditMode ? 'default' : 'pointer',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         gap: 8,
+        textDecoration: 'none',
         transition: isEditMode ? undefined : 'transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease',
       }
       const handleClick = (e: React.MouseEvent) => {
@@ -946,13 +953,14 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
             rel={href.startsWith('#') ? undefined : 'noopener noreferrer'}
             style={sharedStyle}
             className={wrapperClassName}
+            role="button"
           >
             {content}
           </a>
         )
       }
       return (
-        <button onClick={handleClick} style={sharedStyle} className={wrapperClassName}>
+        <button type="button" onClick={handleClick} style={sharedStyle} className={wrapperClassName}>
           {content}
         </button>
       )
@@ -1136,6 +1144,14 @@ function InteractiveNode({
   // Move element
   const handlePointerDownMove = (e: React.PointerEvent) => {
     if (el.locked || isEditingText) return
+
+    // Ctrl/Cmd+Click on a button with link: let the click through so the link opens
+    const hasLink = el.type === 'button' && (el.props?.href as string) && !(el.props?.copyUrl as boolean)
+    if (hasLink && (e.ctrlKey || e.metaKey)) {
+      onSelect()
+      return
+    }
+
     e.stopPropagation()
     e.preventDefault()
     onSelect()
@@ -1217,17 +1233,17 @@ function InteractiveNode({
       if (handle.includes('w')) { newW = w - dx; newX = x + dx }
       if (handle.includes('n')) { newH = h - dy; newY = y + dy }
 
-      // Keep minimum size
-      if (newW < 10) { newX += newW - 10; newW = 10 }
-      if (newH < 10) { newY += newH - 10; newH = 10 }
+      const minSize = el.type === 'button' ? 28 : 10
+      if (newW < minSize) { newX += newW - minSize; newW = minSize }
+      if (newH < minSize) { newY += newH - minSize; newH = minSize }
 
       // Snap edges during resize
       newX = snapToTargets(newX, snapXs, SNAP_THRESHOLD)
       newY = snapToTargets(newY, snapYs, SNAP_THRESHOLD)
       const rightSnapped = snapToTargets(newX + newW, snapXs, SNAP_THRESHOLD)
       const bottomSnapped = snapToTargets(newY + newH, snapYs, SNAP_THRESHOLD)
-      newW = Math.max(10, rightSnapped - newX)
-      newH = Math.max(10, bottomSnapped - newY)
+      newW = Math.max(minSize, rightSnapped - newX)
+      newH = Math.max(minSize, bottomSnapped - newY)
 
       setInternalBox(prev => ({ ...prev, x: newX, y: newY, w: newW, h: newH }))
     }
