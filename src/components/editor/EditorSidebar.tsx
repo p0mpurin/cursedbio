@@ -156,7 +156,7 @@ export default function EditorSidebar({
   elements: PageElement[]
   onUpdateElement: (id: string, updates: Partial<PageElement>) => void
 }) {
-  const [activeTab, setActiveTab] = useState<'elements' | 'hierarchy'>('elements')
+  const [activeTab, setActiveTab] = useState<'elements' | 'graph'>('elements')
   const [showMore, setShowMore] = useState(false)
 
   const mainContainer = elements.find((e) => e.type === 'div' && e.id === 'main')

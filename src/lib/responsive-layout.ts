@@ -76,7 +76,7 @@ function scaleElementToMobile(
     width: Math.max(1, Math.round(el.width * sx)),
     height: Math.max(1, Math.round(el.height * sy)),
     // Preserve numeric props that might need scaling (e.g. avatarSize) - scale by average for fonts
-    props: el.props ? { ...el.props } : undefined,
+    props: el.props ? { ...el.props } : {},
   }
 }
 
