@@ -660,26 +660,26 @@ function buildSnapTargets(
   return { xs: outXs, ys: outYs }
 }
 
-/** 3D tilt effect - container reacts to mouse position. Tilt is reset over interactive elements so hover/click work. */
-const INTERACTIVE_SELECTOR = 'a, button, [role="button"]'
+/** 2D mouse-follow parallax - stable (no 3D), buttons/links work. intensity: px of movement at edges. */
 function TiltContainer({ children, intensity = 12, style: outerStyle }: { children: React.ReactNode; intensity?: number; style?: React.CSSProperties }) {
   const ref = useRef<HTMLDivElement>(null)
-  const [transform, setTransform] = useState('')
+  const [offset, setOffset] = useState({ x: 0, y: 0 })
+  const rafRef = useRef<number>(0)
   const onMouseMove = useCallback((e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest(INTERACTIVE_SELECTOR)) {
-      setTransform('')
-      return
-    }
     const el = ref.current
     if (!el) return
     const rect = el.getBoundingClientRect()
-    const x = (e.clientX - rect.left) / rect.width - 0.5
-    const y = (e.clientY - rect.top) / rect.height - 0.5
-    const ry = x * intensity
-    const rx = -y * intensity
-    setTransform(`perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`)
+    const nx = (e.clientX - rect.left) / rect.width - 0.5
+    const ny = (e.clientY - rect.top) / rect.height - 0.5
+    const px = nx * intensity
+    const py = ny * intensity
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    rafRef.current = requestAnimationFrame(() => setOffset({ x: px, y: py }))
   }, [intensity])
-  const onMouseLeave = useCallback(() => setTransform(''), [])
+  const onMouseLeave = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    setOffset({ x: 0, y: 0 })
+  }, [])
   return (
     <div
       ref={ref}
@@ -688,8 +688,7 @@ function TiltContainer({ children, intensity = 12, style: outerStyle }: { childr
       style={{
         width: '100%',
         height: '100%',
-        perspective: 800,
-        transformStyle: 'preserve-3d',
+        overflow: 'hidden',
         ...outerStyle,
       }}
     >
@@ -697,9 +696,8 @@ function TiltContainer({ children, intensity = 12, style: outerStyle }: { childr
         style={{
           width: '100%',
           height: '100%',
-          transform,
-          transition: transform ? 'transform 0.1s ease-out' : 'transform 0.3s ease-out',
-          transformStyle: 'preserve-3d',
+          transform: `translate(${offset.x}px, ${offset.y}px)`,
+          transition: offset.x === 0 && offset.y === 0 ? 'transform 0.25s ease-out' : 'transform 0.08s ease-out',
         }}
       >
         {children}
@@ -1689,7 +1687,7 @@ function StaticContainerWithTiltAndPinned({ container, pinned }: { container: Pa
                 top: child.y,
                 width: child.width,
                 height: child.height,
-                transform: child.rotation ? `rotate(${child.rotation}deg) translateZ(0)` : 'translateZ(0)',
+                transform: child.rotation ? `rotate(${child.rotation}deg)` : undefined,
                 zIndex: child.zIndex,
                 opacity: (child.props.opacity as number) ?? 1,
               }}

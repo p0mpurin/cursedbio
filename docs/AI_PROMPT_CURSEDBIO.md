@@ -94,7 +94,7 @@ All optional except `width` and `height` in practice.
 | `zIndex` | number | ✓ | Stacking order (higher = on top) |
 | `locked` | boolean | | Prevent editing |
 | `visible` | boolean | | If false, element is hidden |
-| `pinnedTo` | string | | ID of a **container** (`type: "div"`). Element is drawn inside that container and (if container has `mouseTilt`) tilts with it. Omit or empty = canvas root. |
+| `pinnedTo` | string | | ID of a **container** (`type: "div"`). Element is drawn inside that container and (if container has `mouseTilt`) follows the mouse with it. Omit or empty = canvas root. |
 | `props` | object | ✓ | Type-specific properties (see below) |
 
 ---
@@ -182,7 +182,7 @@ Use for links and icon-only “icon links”.
 
 ### 5. Container — `type: "div"`
 
-Glass/frosted panel. Other elements can set `pinnedTo` to this element’s `id` so they sit inside it and tilt with it.
+Glass/frosted panel. Other elements can set `pinnedTo` to this element’s `id` so they sit inside it and follow the mouse with it (parallax).
 
 | Prop | Type | Description |
 |------|------|-------------|
@@ -191,8 +191,8 @@ Glass/frosted panel. Other elements can set `pinnedTo` to this element’s `id` 
 | `border` | string | e.g. `"1px solid rgba(255,255,255,0.12)"` |
 | `borderRadius` | string | e.g. `"16px"` |
 | `boxShadow` | string | CSS box-shadow |
-| `mouseTilt` | boolean | 3D tilt on hover (view mode) |
-| `tiltIntensity` | number | Tilt strength (default 12) |
+| `mouseTilt` | boolean | Parallax follow on hover (view mode); content moves slightly with the mouse |
+| `tiltIntensity` | number | Movement in px at edges (default 12) |
 | `background` | string | CSS background (e.g. gradient) |
 | `backgroundImage` | string | Image URL |
 | `backgroundSize` | string | `"cover"` \| `"contain"` |
@@ -301,7 +301,7 @@ Raw HTML for icons, SVGs, or custom widgets. Use **Element CSS** for glow, hover
 ## Pinning elements to a container
 
 - Create a **container**: `type: "div"`, give it an `id` (e.g. `"main"`, `"card"`).
-- For any other element that should sit **inside** that container (and tilt with it if the container has `mouseTilt`), set **`pinnedTo`** to that container’s `id`.
+- For any other element that should sit **inside** that container (and follow the mouse with it if the container has `mouseTilt`), set **`pinnedTo`** to that container’s `id`.
 - Pinned element coordinates (`x`, `y`) are **relative to the container’s top-left**, not the canvas.
 - Elements with no `pinnedTo` (or empty) are on the **canvas root**.
 

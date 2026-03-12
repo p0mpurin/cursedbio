@@ -1259,7 +1259,7 @@ export default function PropertiesPanel({
                         </p>
                     </Row>
                     <Row>
-                        <Label>3D Mouse Tilt</Label>
+                        <Label>React to mouse</Label>
                         <div className="flex items-center gap-2">
                             <input
                                 type="checkbox"
@@ -1267,12 +1267,12 @@ export default function PropertiesPanel({
                                 onChange={(e) => prop('mouseTilt', e.target.checked)}
                                 className="accent-[var(--messmer-copper)]"
                             />
-                            <span className="text-sm text-[var(--text-muted)]">React to mouse (view mode)</span>
+                            <span className="text-sm text-[var(--text-muted)]">Parallax follow (view mode)</span>
                         </div>
                     </Row>
                     {(element.props.mouseTilt as boolean) && (
                         <Row>
-                            <Label>Tilt Intensity</Label>
+                            <Label>Movement (px)</Label>
                             <StepperField value={(element.props.tiltIntensity as number) ?? 12} min={2} max={30} onChange={(v) => prop('tiltIntensity', v)} />
                         </Row>
                     )}
