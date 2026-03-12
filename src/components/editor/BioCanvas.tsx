@@ -978,6 +978,53 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
         </button>
       )
     }
+    case 'html': {
+      const html = (el.props.html as string) ?? ''
+      const href = (el.props.href as string) ?? ''
+      const customCss = (el.props.customCss as string) ?? ''
+      const wrapperStyle: React.CSSProperties = {
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'auto',
+        opacity: (el.props.opacity as number) ?? 1,
+      }
+      if (isEditMode) {
+        return (
+          <div style={{ ...wrapperStyle, background: 'rgba(0,0,0,0.2)', borderRadius: 8 }}>
+            <span className="text-xs text-[var(--text-muted)]">Custom HTML</span>
+          </div>
+        )
+      }
+      const inner = (
+        <div
+          className="custom-html-content"
+          style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          dangerouslySetInnerHTML={html ? { __html: html } : { __html: '<!-- Custom HTML -->' }}
+        />
+      )
+      return (
+        <>
+          {customCss && (
+            <style dangerouslySetInnerHTML={{ __html: customCss.replace(/\{\{id\}\}/g, el.id) }} />
+          )}
+          {href && href.trim() ? (
+            <a
+              href={href.startsWith('#') ? href : href}
+              target={href.startsWith('#') ? undefined : '_blank'}
+              rel={href.startsWith('#') ? undefined : 'noopener noreferrer'}
+              style={{ ...wrapperStyle, cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
+            >
+              {inner}
+            </a>
+          ) : (
+            <div style={wrapperStyle}>{inner}</div>
+          )}
+        </>
+      )
+    }
     case 'div': {
       const bf = (el.props.backdropFilter as string) ?? ''
       const bg = (el.props.backgroundColor as string) ?? 'transparent'
@@ -1159,7 +1206,7 @@ function InteractiveNode({
     if (el.locked || isEditingText) return
 
     // Ctrl/Cmd+Click on a button with link: let the click through so the link opens
-    const hasLink = el.type === 'button' && (el.props?.href as string) && !(el.props?.copyUrl as boolean)
+    const hasLink = (el.type === 'button' && (el.props?.href as string) && !(el.props?.copyUrl as boolean)) || (el.type === 'html' && (el.props?.href as string))
     if (hasLink && (e.ctrlKey || e.metaKey)) {
       onSelect()
       return
@@ -1246,7 +1293,7 @@ function InteractiveNode({
       if (handle.includes('w')) { newW = w - dx; newX = x + dx }
       if (handle.includes('n')) { newH = h - dy; newY = y + dy }
 
-      const minSize = el.type === 'button' ? 28 : 10
+      const minSize = (el.type === 'button' || el.type === 'html') ? 28 : 10
       if (newW < minSize) { newX += newW - minSize; newW = minSize }
       if (newH < minSize) { newY += newH - minSize; newH = minSize }
 

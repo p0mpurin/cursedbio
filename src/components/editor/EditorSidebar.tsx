@@ -143,6 +143,20 @@ const MORE_ELEMENTS: Array<{ label: string; icon: string; template: Omit<PageEle
         borderRadius: '50%',
       }
     }
+  },
+  {
+    label: 'Custom HTML',
+    icon: '</>',
+    template: {
+      type: 'html',
+      name: 'Custom HTML',
+      x: 100, y: 100, width: 64, height: 64, zIndex: 15,
+      props: {
+        html: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
+        href: 'https://github.com',
+        customCss: '[data-element-id="{{id}}"] { transition: filter 0.3s ease; cursor: pointer; } [data-element-id="{{id}}"]:hover { filter: drop-shadow(0 0 12px rgba(255,200,100,0.8)); }'
+      }
+    }
   }
 ]
 

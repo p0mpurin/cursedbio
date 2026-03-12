@@ -1183,6 +1183,38 @@ export default function PropertiesPanel({
                 </Section>
             )}
 
+            {/* Custom HTML */}
+            {element.type === 'html' && (
+                <Section title="Custom HTML">
+                    <Row>
+                        <Label>HTML content</Label>
+                        <textarea
+                            value={(element.props.html as string) ?? ''}
+                            onChange={(e) => prop('html', e.target.value)}
+                            placeholder="<svg>...</svg> or <img src='...' /> etc."
+                            className="w-full min-h-[120px] bg-white/5 border border-white/10 rounded-md px-2 py-1.5 text-sm font-mono text-[var(--messmer-ivory)] focus:outline-none focus:border-[var(--messmer-copper)]/60 resize-y"
+                            spellCheck={false}
+                        />
+                        <p className="text-[10px] text-[var(--text-muted)] mt-1">Use {"{{id}}"} in CSS to scope to this element.</p>
+                    </Row>
+                    <Row>
+                        <Label>Link URL (optional)</Label>
+                        <Inp value={(element.props.href as string) ?? ''} onChange={(v) => prop('href', v)} placeholder="https://... — makes whole element clickable" />
+                    </Row>
+                    <Row>
+                        <Label>Element CSS</Label>
+                        <textarea
+                            value={(element.props.customCss as string) ?? ''}
+                            onChange={(e) => prop('customCss', e.target.value)}
+                            placeholder={'[data-element-id="{{id}}"] { filter: drop-shadow(0 0 8px gold); }\n[data-element-id="{{id}}"]:hover { filter: drop-shadow(0 0 16px gold); }'}
+                            className="w-full min-h-[100px] bg-white/5 border border-white/10 rounded-md px-2 py-1.5 text-sm font-mono text-[var(--messmer-ivory)] focus:outline-none focus:border-[var(--messmer-copper)]/60 resize-y"
+                            spellCheck={false}
+                        />
+                        <p className="text-[10px] text-[var(--text-muted)] mt-1">Use {"{{id}}"} to scope to this element. Controls glow, hover, etc.</p>
+                    </Row>
+                </Section>
+            )}
+
             {/* Div / Container */}
             {element.type === 'div' && (
                 <Section title="Container">

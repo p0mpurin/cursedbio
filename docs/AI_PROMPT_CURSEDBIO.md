@@ -84,7 +84,7 @@ All optional except `width` and `height` in practice.
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `id` | string | ✓ | Unique ID, e.g. `"name"`, `"avatar"`, `"btn-spotify"` |
-| `type` | string | ✓ | One of: `text`, `image`, `audio`, `video`, `embed`, `shape`, `div`, `button`, `profileViews`, `discordProfile` |
+| `type` | string | ✓ | One of: `text`, `image`, `audio`, `video`, `embed`, `shape`, `div`, `button`, `profileViews`, `discordProfile`, `html` |
 | `name` | string | | Label in layers panel |
 | `x` | number | ✓ | Left position (px) |
 | `y` | number | ✓ | Top position (px) |
@@ -268,6 +268,33 @@ Shows Discord avatar, username, badges, status (via Lanyard if user is in Lanyar
 | `containerBorder` | string | Inner box border |
 | `containerRadius` | string | Inner box radius |
 | `opacity` | number | 0–1 |
+
+---
+
+### 11. Custom HTML — `type: "html"`
+
+Raw HTML for icons, SVGs, or custom widgets. Use **Element CSS** for glow, hover, and animations. Works like a button when `href` is set.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `html` | string | Raw HTML, e.g. `<svg>...</svg>`, `<img src="..." />` |
+| `href` | string | Optional. If set, the whole element becomes a clickable link (opens in new tab) |
+| `customCss` | string | Element-specific CSS. Use `{{id}}` as placeholder; it's replaced with the element's `id` for scoping. Example: `[data-element-id="{{id}}"] { filter: drop-shadow(0 0 8px gold); transition: filter 0.3s; } [data-element-id="{{id}}"]:hover { filter: drop-shadow(0 0 16px gold); }` |
+| `opacity` | number | 0–1 |
+
+**Example — glowing icon link:**
+```json
+{
+  "id": "icon-github",
+  "type": "html",
+  "x": 200, "y": 100, "width": 48, "height": 48, "zIndex": 15,
+  "props": {
+    "html": "<img src=\"https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/github.svg\" width=\"28\" height=\"28\" style=\"display:block\" />",
+    "href": "https://github.com",
+    "customCss": "[data-element-id=\"{{id}}\"] { cursor: pointer; transition: filter 0.3s; } [data-element-id=\"{{id}}\"]:hover { filter: drop-shadow(0 0 12px rgba(255,200,100,0.8)); }"
+  }
+}
+```
 
 ---
 
