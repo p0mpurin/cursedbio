@@ -1160,24 +1160,30 @@ export default function PropertiesPanel({
                         <div className="flex gap-2 flex-wrap">
                             <button
                                 type="button"
-                                onClick={() => {
-                                    prop('backgroundColor', 'rgba(255,255,255,0.08)')
-                                    prop('backdropFilter', 'blur(12px)')
-                                    prop('border', '1px solid rgba(255,255,255,0.12)')
-                                    prop('borderRadius', '16px')
-                                }}
+                                onClick={() => upd({
+                                    props: {
+                                        ...element.props,
+                                        backgroundColor: 'rgba(255,255,255,0.08)',
+                                        backdropFilter: 'blur(12px)',
+                                        border: '1px solid rgba(255,255,255,0.12)',
+                                        borderRadius: '16px',
+                                    },
+                                })}
                                 className="px-2 py-1.5 rounded text-xs bg-white/5 hover:bg-[var(--messmer-copper)]/20 border border-white/10"
                             >
                                 Glass
                             </button>
                             <button
                                 type="button"
-                                onClick={() => {
-                                    prop('backgroundColor', 'rgba(0,0,0,0.4)')
-                                    prop('backdropFilter', 'blur(16px) brightness(0.8)')
-                                    prop('border', '1px solid rgba(255,255,255,0.08)')
-                                    prop('borderRadius', '24px')
-                                }}
+                                onClick={() => upd({
+                                    props: {
+                                        ...element.props,
+                                        backgroundColor: 'rgba(0,0,0,0.4)',
+                                        backdropFilter: 'blur(16px) brightness(0.8)',
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                        borderRadius: '24px',
+                                    },
+                                })}
                                 className="px-2 py-1.5 rounded text-xs bg-white/5 hover:bg-[var(--messmer-copper)]/20 border border-white/10"
                             >
                                 Frosted
@@ -1270,11 +1276,16 @@ export default function PropertiesPanel({
                     </Row>
                     <Row>
                         <Label>Border Radius</Label>
-                        <Inp value={(element.props.borderRadius as string) ?? '0'} onChange={(v) => prop('borderRadius', v)} />
+                        <Inp value={(element.props.borderRadius as string) ?? '0'} placeholder="0 or 12px" onChange={(v) => prop('borderRadius', v)} />
                     </Row>
                     <Row>
-                        <Label>Border</Label>
-                        <Inp value={(element.props.border as string) ?? ''} onChange={(v) => prop('border', v)} />
+                        <Label>Custom border</Label>
+                        <div className="flex gap-2 flex-wrap mb-1">
+                            <button type="button" onClick={() => prop('border', '')} className="px-2 py-1 rounded text-[10px] bg-white/5 hover:bg-[var(--messmer-copper)]/20 border border-white/10">None</button>
+                            <button type="button" onClick={() => prop('border', '1px solid rgba(255,255,255,0.1)')} className="px-2 py-1 rounded text-[10px] bg-white/5 hover:bg-[var(--messmer-copper)]/20 border border-white/10">Thin</button>
+                            <button type="button" onClick={() => prop('border', '1px solid rgba(255,255,255,0.2)')} className="px-2 py-1 rounded text-[10px] bg-white/5 hover:bg-[var(--messmer-copper)]/20 border border-white/10">Medium</button>
+                        </div>
+                        <Inp value={(element.props.border as string) ?? ''} placeholder="e.g. 1px solid rgba(255,255,255,0.15)" onChange={(v) => prop('border', v)} />
                     </Row>
                     <ShadowRow
                         label="Box Shadow"
