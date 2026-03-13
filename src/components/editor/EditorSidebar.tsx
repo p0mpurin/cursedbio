@@ -119,11 +119,47 @@ const MORE_ELEMENTS: Array<{ label: string; icon: string; template: Omit<PageEle
         showAvatar: true,
         showUsername: true,
         showBadges: true,
+        showActivity: false,
+        showActivityImage: false,
+        showSpotifyBar: false,
+        showAvatarDecoration: false,
         avatarSize: 48,
         fontSize: 14,
         color: '#e5e5e5',
         status: 'offline',
         customStatus: '',
+      }
+    }
+  },
+  {
+    label: 'Spotify Now Playing',
+    icon: '♫',
+    template: {
+      type: 'spotifyNowPlaying',
+      name: 'Spotify Now Playing',
+      x: 100, y: 100, width: 280, height: 90, zIndex: 10,
+      props: {
+        userId: '',
+        showProgress: true,
+        showAlbumArt: true,
+        accentColor: '#1db954',
+        idleText: 'not listening',
+      }
+    }
+  },
+  {
+    label: 'Badges',
+    icon: '◎',
+    template: {
+      type: 'badges',
+      name: 'Badges',
+      x: 100, y: 100, width: 200, height: 40, zIndex: 10,
+      props: {
+        badges: [],
+        source: 'custom',
+        size: 28,
+        gap: 8,
+        hoverEffect: 'lift',
       }
     }
   },

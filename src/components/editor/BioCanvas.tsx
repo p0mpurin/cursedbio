@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PageElement, PageLayout } from '@/lib/db'
 
-const BADGE_CDN = 'https://cdn.jsdelivr.net/gh/merlinfuchs/discord-badges@main/SVG'
+const BADGE_CDN = 'https://rawcdn.githack.com/merlinfuchs/discord-badges/main/SVG'
 const NITRO_BADGE_IMG = `${BADGE_CDN}/nitro.svg`
 
 function DiscordBadgeIcon({ badge }: { badge: string }) {
@@ -18,9 +18,9 @@ function DiscordBadgeIcon({ badge }: { badge: string }) {
       case 'hypesquad': return { color: '#F8A532', path: '', title: 'HypeSquad Events', imageUrl: `${BADGE_CDN}/hypesquad_events.svg` }
       case 'bug_hunter_1': return { color: '#43B581', path: 'M20 13h-2v-2h-2v2h-2v-2h-2v2h-2v-2H8v2H6v-2H4v3h16v-3h-2zm-6-4H8v2h6V9zm0-3H8v2h6V6z', title: 'Discord Bug Hunter' }
       case 'bug_hunter_2': return { color: '#FAA61A', path: 'M20 13h-2v-2h-2v2h-2v-2h-2v2h-2v-2H8v2H6v-2H4v3h16v-3h-2zm-6-4H8v2h6V9zm0-3H8v2h6V6z', title: 'Discord Bug Hunter' }
-      case 'hypesquad_bravery': return { color: '#9B84EE', path: 'M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4zm0 16.5c-3.55 0-6.5-3.37-6.5-7.5S8.45 3.5 12 3.5s6.5 3.37 6.5 7.5-2.95 7.5-6.5 7.5zm-3-8h6v2H9v-2z', title: 'HypeSquad Bravery' }
-      case 'hypesquad_brilliance': return { color: '#F47B67', path: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zM9 9h6v2H9z', title: 'HypeSquad Brilliance' }
-      case 'hypesquad_balance': return { color: '#45DDCA', path: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5', title: 'HypeSquad Balance' }
+      case 'hypesquad_bravery': return { color: '#9B84EE', path: '', title: 'HypeSquad Bravery', imageUrl: `${BADGE_CDN}/hypesquad_bravery.svg` }
+      case 'hypesquad_brilliance': return { color: '#F47B67', path: '', title: 'HypeSquad Brilliance', imageUrl: `${BADGE_CDN}/hypesquad_brilliance.svg` }
+      case 'hypesquad_balance': return { color: '#45DDCA', path: '', title: 'HypeSquad Balance', imageUrl: `${BADGE_CDN}/hypesquad_balance.svg` }
       case 'early_supporter': return { color: '#7289DA', path: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2V7z', title: 'Early Supporter' }
       case 'verified_dev': return { color: '#3BA55D', path: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z', title: 'Verified Bot Developer' }
       case 'certified_mod': return { color: '#3BA55D', path: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2.83 14.41l-2.83-2.83 2.83-2.83 1.41 1.42-1.42 1.41 1.42 1.42-1.41 1.41zm5.66-5.66L14.41 12l2.83-2.83-1.41-1.41-2.83 2.83-2.83-2.83-1.42 1.41 2.83 2.83-2.83 2.83 1.41 1.41 2.83-2.83 1.42-1.42z', title: 'Certified Moderator' }
@@ -37,8 +37,8 @@ function DiscordBadgeIcon({ badge }: { badge: string }) {
 
   if (details.imageUrl) {
     return (
-      <div title={details.title} style={{ display: 'inline-flex', cursor: 'pointer' }}>
-        <img src={details.imageUrl} alt={details.title} width={22} height={22} style={{ display: 'block' }} />
+      <div title={details.title} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, cursor: 'pointer' }}>
+        <img src={details.imageUrl} alt={details.title} width={22} height={22} style={{ display: 'block', objectFit: 'contain' }} />
       </div>
     )
   }
@@ -118,6 +118,9 @@ function DiscordProfileDisplay({
   const [lanyard, setLanyard] = useState<{
     status: 'online' | 'idle' | 'dnd' | 'offline'
     customStatus: string
+    activity?: { name: string; state?: string; application_id?: string; assets?: { large_image?: string } }
+    spotify?: { album_art_url: string; song: string; artist: string; album: string }
+    avatarDecoration?: string
   } | null>(null)
 
   useEffect(() => {
@@ -142,12 +145,15 @@ function DiscordProfileDisplay({
           ? d.discord_status
           : 'offline'
         let customStatus = ''
-        const activities = d.activities as Array<{ type?: number; name?: string; state?: string }> | undefined
+        const activities = d.activities as Array<{ type?: number; name?: string; state?: string; application_id?: string; assets?: { large_image?: string } }> | undefined
         if (activities?.length) {
           const custom = activities.find((a) => a.type === 4 || a.name === 'Custom Status')
           if (custom?.state) customStatus = custom.state
         }
-        setLanyard({ status, customStatus })
+        const gameActivity = activities?.find((a) => a.type === 0)
+        const spotify = d.listening_to_spotify && d.spotify ? d.spotify as { album_art_url: string; song: string; artist: string; album: string } : undefined
+        const avatarDecoration = (d.discord_user as { avatar_decoration_data?: { asset?: string } })?.avatar_decoration_data?.asset
+        setLanyard({ status, customStatus, activity: gameActivity, spotify, avatarDecoration })
       })
       .catch(() => {})
     return () => ac.abort()
@@ -156,6 +162,10 @@ function DiscordProfileDisplay({
   const showAvatar = (el.props.showAvatar as boolean) !== false
   const showUsername = (el.props.showUsername as boolean) !== false
   const showBadges = (el.props.showBadges as boolean) !== false
+  const showActivity = (el.props.showActivity as boolean) === true
+  const showActivityImage = (el.props.showActivityImage as boolean) === true
+  const showSpotifyBar = (el.props.showSpotifyBar as boolean) === true
+  const showAvatarDecoration = (el.props.showAvatarDecoration as boolean) === true
   const avatarSize = (el.props.avatarSize as number) ?? 48
   const fontSize = (el.props.fontSize as number) ?? 14
   const color = (el.props.color as string) ?? '#e5e5e5'
@@ -230,13 +240,21 @@ function DiscordProfileDisplay({
   const containerBorder = (el.props.containerBorder as string) ?? '1px solid rgba(88,101,242,0.3)'
   const containerRadius = (el.props.containerRadius as string) ?? '12px'
 
+  const activity = lanyard?.activity
+  const spotify = lanyard?.spotify
+  const avatarDecorationAsset = showAvatarDecoration && lanyard?.avatarDecoration ? lanyard.avatarDecoration : null
+  const avatarDecorationUrl = avatarDecorationAsset && data?.id ? `https://cdn.discordapp.com/avatar-decorations/${data.id}/${avatarDecorationAsset}.png` : null
+  const activityImageUrl = activity?.application_id && activity?.assets?.large_image && !activity.assets.large_image.startsWith('mp:')
+    ? `https://cdn.discordapp.com/app-assets/${activity.application_id}/${activity.assets.large_image}.png`
+    : spotify?.album_art_url
+
   return (
     <div
       style={{
         width: '100%',
         height: '100%',
         display: 'flex',
-        alignItems: 'center',
+        flexDirection: 'column',
         padding: 12,
         gap: 12,
         opacity,
@@ -246,49 +264,298 @@ function DiscordProfileDisplay({
         boxSizing: 'border-box',
       }}
     >
-      {showAvatar && (
-        <div
-          style={{
-            position: 'relative',
-            flexShrink: 0,
-            width: avatarSize,
-            height: avatarSize,
-          }}
-        >
-          <img
-            src={data.avatar_url}
-            alt=""
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minHeight: 0 }}>
+        {showAvatar && (
+          <div
             style={{
+              position: 'relative',
+              flexShrink: 0,
               width: avatarSize,
               height: avatarSize,
-              borderRadius: '50%',
-              objectFit: 'cover',
             }}
-          />
-          <div style={{ position: 'absolute', right: 0, bottom: 0 }} title={status}>
-            <DiscordStatusIcon status={status} size={Math.max(12, avatarSize * 0.28)} borderColor={containerBg} />
+          >
+            <img
+              src={data.avatar_url}
+              alt=""
+              style={{
+                width: avatarSize,
+                height: avatarSize,
+                borderRadius: '50%',
+                objectFit: 'cover',
+              }}
+            />
+            {avatarDecorationUrl && (
+              <img
+                src={avatarDecorationUrl}
+                alt=""
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  pointerEvents: 'none',
+                }}
+              />
+            )}
+            <div style={{ position: 'absolute', right: 0, bottom: 0 }} title={status}>
+              <DiscordStatusIcon status={status} size={Math.max(12, avatarSize * 0.28)} borderColor={containerBg} />
+            </div>
           </div>
-        </div>
-      )}
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2, justifyContent: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          {showUsername && (
-            <span style={{ fontSize, fontWeight: 600, color }}>{data.global_name || data.username}</span>
+        )}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2, justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            {showUsername && (
+              <span style={{ fontSize, fontWeight: 600, color }}>{data.global_name || data.username}</span>
+            )}
+            {showBadges && data.badges.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                {data.badges.slice(0, 8).map((b) => (
+                  <DiscordBadgeIcon key={b} badge={b} />
+                ))}
+              </div>
+            )}
+          </div>
+          {customStatus && (
+            <span style={{ fontSize: Math.max(10, fontSize - 2), color: 'rgba(255,255,255,0.65)' }}>
+              {customStatus}
+            </span>
           )}
-          {showBadges && data.badges.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              {data.badges.slice(0, 8).map((b) => (
-                <DiscordBadgeIcon key={b} badge={b} />
-              ))}
+          {showActivity && (activity || spotify) && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+              {showActivityImage && activityImageUrl && (
+                <img src={activityImageUrl} alt="" style={{ width: 20, height: 20, borderRadius: 4, objectFit: 'cover' }} />
+              )}
+              <span style={{ fontSize: Math.max(10, fontSize - 2), color: 'rgba(255,255,255,0.7)' }}>
+                {spotify ? `Listening to ${spotify.song} — ${spotify.artist}` : activity ? `Playing ${activity.name}${activity.state ? ` — ${activity.state}` : ''}` : ''}
+              </span>
             </div>
           )}
         </div>
-        {customStatus && (
-          <span style={{ fontSize: Math.max(10, fontSize - 2), color: 'rgba(255,255,255,0.65)' }}>
-            {customStatus}
-          </span>
+      </div>
+      {showSpotifyBar && spotify && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '8px 10px',
+            backgroundColor: 'rgba(29,185,84,0.15)',
+            borderRadius: 8,
+            border: '1px solid rgba(29,185,84,0.3)',
+          }}
+        >
+          {spotify.album_art_url && (
+            <img src={spotify.album_art_url} alt="" style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover' }} />
+          )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: Math.max(11, fontSize - 1), fontWeight: 600, color: '#fff' }}>{spotify.song}</div>
+            <div style={{ fontSize: Math.max(10, fontSize - 2), color: 'rgba(255,255,255,0.7)' }}>{spotify.artist}</div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Spotify Now Playing - fetches Lanyard for given Discord userId */
+function SpotifyNowPlayingDisplay({ el, isEditMode }: { el: PageElement; isEditMode: boolean }) {
+  const userId = (el.props.userId as string) || ''
+  const showProgress = (el.props.showProgress as boolean) !== false
+  const showAlbumArt = (el.props.showAlbumArt as boolean) !== false
+  const accentColor = (el.props.accentColor as string) ?? '#1db954'
+  const idleText = (el.props.idleText as string) ?? 'not listening'
+  const opacity = (el.props.opacity as number) ?? 1
+
+  const [spotify, setSpotify] = useState<{ album_art_url: string; song: string; artist: string; album: string; timestamps?: { start?: number; end?: number } } | null>(null)
+  const [loading, setLoading] = useState(!!userId)
+
+  useEffect(() => {
+    if (!userId) {
+      setLoading(false)
+      return
+    }
+    const ac = new AbortController()
+    fetch(`${LANYARD_API}/${userId}`, { signal: ac.signal })
+      .then((r) => r.ok ? r.json() : null)
+      .then((json) => {
+        if (!json?.success || !json?.data?.listening_to_spotify || !json.data.spotify) {
+          setSpotify(null)
+        } else {
+          setSpotify(json.data.spotify)
+        }
+      })
+      .catch(() => setSpotify(null))
+      .finally(() => setLoading(false))
+    return () => ac.abort()
+  }, [userId])
+
+  const progress = spotify?.timestamps?.start && spotify?.timestamps?.end
+    ? ((Date.now() - spotify.timestamps.start * 1000) / ((spotify.timestamps.end - spotify.timestamps.start) * 1000)) * 100
+    : 0
+
+  if (isEditMode && !userId) {
+    return (
+      <div
+        style={{
+          width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(29,185,84,0.1)', borderRadius: 12, border: '1px dashed rgba(29,185,84,0.4)', opacity,
+        }}
+      >
+        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Set Discord user ID for Lanyard</span>
+      </div>
+    )
+  }
+
+  if (!spotify) {
+    return (
+      <div
+        style={{
+          width: '100%', height: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: 12,
+          backgroundColor: `rgba(29,185,84,0.08)`, borderRadius: 12, border: `1px solid ${accentColor}30`, opacity,
+        }}
+      >
+        {showAlbumArt && (
+          <div style={{ width: 48, height: 48, borderRadius: 8, backgroundColor: 'rgba(0,0,0,0.2)', flexShrink: 0 }} />
+        )}
+        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>{loading ? 'Loading…' : idleText}</span>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      style={{
+        width: '100%', height: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: 12,
+        backgroundColor: `${accentColor}15`, borderRadius: 12, border: `1px solid ${accentColor}40`, opacity,
+      }}
+    >
+      {showAlbumArt && spotify.album_art_url && (
+        <img src={spotify.album_art_url} alt="" style={{ width: 56, height: 56, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
+      )}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{spotify.song}</div>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>{spotify.artist}</div>
+        {showProgress && spotify.timestamps?.start && spotify.timestamps?.end && (
+          <div style={{ marginTop: 6, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.2)', overflow: 'hidden' }}>
+            <div
+              style={{
+                width: `${Math.min(100, Math.max(0, progress))}%`,
+                height: '100%',
+                background: accentColor,
+                borderRadius: 2,
+                transition: 'width 0.5s linear',
+              }}
+            />
+          </div>
         )}
       </div>
+    </div>
+  )
+}
+
+/** Badge strip — displays custom badges or platform badges in a row */
+function BadgesDisplay({ el, isEditMode }: { el: PageElement; isEditMode: boolean }) {
+  const badgesProp = (el.props.badges as Array<{ id: string; src: string; tooltip?: string; href?: string }>) ?? []
+  const source = (el.props.source as string) ?? 'custom'
+  const size = (el.props.size as number) ?? 28
+  const gap = (el.props.gap as number) ?? 8
+  const hoverEffect = (el.props.hoverEffect as string) ?? 'lift'
+  const opacity = (el.props.opacity as number) ?? 1
+
+  const [platformBadges, setPlatformBadges] = useState<Array<{ id: string; src: string; tooltip: string }>>([])
+  const usePlatform = source === 'platform'
+
+  useEffect(() => {
+    if (!usePlatform) return
+    fetch('/api/platform-badges')
+      .then((r) => r.json())
+      .then((d) => setPlatformBadges(d.badges ?? []))
+      .catch(() => setPlatformBadges([]))
+  }, [usePlatform])
+
+  const badges = usePlatform ? platformBadges : badgesProp
+  if (badges.length === 0) {
+    return (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap,
+          opacity,
+          background: isEditMode ? 'rgba(255,200,100,0.08)' : undefined,
+          borderRadius: 12,
+          border: isEditMode ? '1px dashed rgba(255,200,100,0.4)' : undefined,
+        }}
+      >
+        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
+          {usePlatform ? 'No platform badges' : 'Add badges in props'}
+        </span>
+      </div>
+    )
+  }
+
+  const hoverStyle: React.CSSProperties =
+    hoverEffect === 'lift' ? { transition: 'transform 0.2s ease' } as React.CSSProperties & { ':hover'?: object }
+    : hoverEffect === 'scale' ? { transition: 'transform 0.2s ease' } as React.CSSProperties & { ':hover'?: object }
+    : hoverEffect === 'glow' ? { transition: 'filter 0.2s ease' } as React.CSSProperties & { ':hover'?: object }
+    : {}
+
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        gap,
+        flexWrap: 'wrap',
+        opacity,
+      }}
+    >
+      {badges.map((b) => {
+        const href = 'href' in b ? (b as { href?: string }).href : undefined
+        const tooltip = b.tooltip ?? b.id
+        const imgEl = (
+          <img
+            src={b.src}
+            alt=""
+            title={tooltip}
+            style={{
+              width: size,
+              height: size,
+              objectFit: 'contain',
+              flexShrink: 0,
+              ...(hoverEffect === 'lift' && !isEditMode ? { transition: 'transform 0.2s ease' } : {}),
+              ...(hoverEffect === 'glow' && !isEditMode ? { transition: 'filter 0.2s ease' } : {}),
+            }}
+            onMouseEnter={(e) => {
+              if (isEditMode) return
+              if (hoverEffect === 'lift') e.currentTarget.style.transform = 'translateY(-4px)'
+              if (hoverEffect === 'scale') e.currentTarget.style.transform = 'scale(1.15)'
+              if (hoverEffect === 'glow') e.currentTarget.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.6))'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = ''
+              e.currentTarget.style.filter = ''
+            }}
+          />
+        )
+        const Wrapper = href && !isEditMode ? 'a' : 'div'
+        return (
+          <Wrapper
+            key={b.id}
+            {...(href && !isEditMode
+              ? { href, target: '_blank', rel: 'noopener noreferrer', style: { display: 'flex' } }
+              : { style: { display: 'flex' } })}
+          >
+            {imgEl}
+          </Wrapper>
+        )
+      })}
     </div>
   )
 }
@@ -801,17 +1068,34 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
         overflow: 'hidden',
       }
       
+      const usernameEffect = (el.props.usernameEffect as string) ?? ''
+      const usernameEffectSpeed = (el.props.usernameEffectSpeed as number) ?? 1.5
+      const duration = `${2 / usernameEffectSpeed}s`
       let animations: string[] = []
       if (!isEditMode) {
         if (effectsArray.includes('fade')) animations.push('textFadeIn 0.8s ease-out forwards')
         if (effectsArray.includes('glitch')) animations.push('textGlitch 2s ease-in-out infinite')
         if (effectsArray.includes('glow')) animations.push('textGlow 2s ease-in-out infinite')
         if (effectsArray.includes('glowParticles')) animations.push('textGlow 2.5s ease-in-out infinite')
+        if (usernameEffect === 'rainbow') animations.push(`textRainbow ${duration} linear infinite`)
+        if (usernameEffect === 'shimmer') animations.push(`textShimmer ${duration} linear infinite`)
+        if (usernameEffect === 'glitch') animations.push(`textGlitch ${duration} ease-in-out infinite`)
+        if (usernameEffect === 'chromatic') animations.push(`textChromatic ${duration} ease-in-out infinite`)
+        if (usernameEffect === 'neon') animations.push(`textNeon ${duration} ease-in-out infinite`)
       }
 
       const effectStyle: React.CSSProperties = animations.length > 0
         ? { animation: animations.join(', ') }
         : {}
+      if (usernameEffect === 'shimmer' && !isEditMode) {
+        Object.assign(effectStyle, {
+          background: 'linear-gradient(90deg, currentColor 0%, transparent 40%, currentColor 60%, transparent 100%)',
+          backgroundSize: '200% 100%',
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          color: 'transparent',
+        } as React.CSSProperties)
+      }
 
       const hasParticles = !isEditMode && effectsArray.includes('glowParticles')
       const effectClass = hasParticles ? 'text-effect-glow-particles' : ''
@@ -1133,6 +1417,22 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
     case 'discordProfile': {
       return (
         <DiscordProfileDisplay
+          el={el}
+          isEditMode={isEditMode}
+        />
+      )
+    }
+    case 'spotifyNowPlaying': {
+      return (
+        <SpotifyNowPlayingDisplay
+          el={el}
+          isEditMode={isEditMode}
+        />
+      )
+    }
+    case 'badges': {
+      return (
+        <BadgesDisplay
           el={el}
           isEditMode={isEditMode}
         />

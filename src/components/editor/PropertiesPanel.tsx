@@ -803,6 +803,25 @@ export default function PropertiesPanel({
                             })}
                         </div>
                     </Row>
+                    <SelectRow
+                        label="Username Effect"
+                        value={(element.props.usernameEffect as string) ?? ''}
+                        options={[
+                            { value: '', label: 'None' },
+                            { value: 'rainbow', label: 'Rainbow' },
+                            { value: 'shimmer', label: 'Shimmer' },
+                            { value: 'glitch', label: 'Glitch' },
+                            { value: 'chromatic', label: 'Chromatic' },
+                            { value: 'neon', label: 'Neon' },
+                        ]}
+                        onChange={(v) => prop('usernameEffect', v || undefined)}
+                    />
+                    {((element.props.usernameEffect as string) ?? '') && (
+                        <Row>
+                            <Label>Effect Speed</Label>
+                            <StepperField value={(element.props.usernameEffectSpeed as number) ?? 1.5} min={0.5} max={3} step={0.1} onChange={(v) => prop('usernameEffectSpeed', v)} />
+                        </Row>
+                    )}
                     {((element.props.textEffects as string[])?.includes('typewriter') || (element.props.textEffect === 'typewriter')) && (
                         <>
                             <Row>
@@ -1085,6 +1104,34 @@ export default function PropertiesPanel({
                         </label>
                     </Row>
                     <Row>
+                        <Label>Show activity (game/app)</Label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked={(element.props.showActivity as boolean) === true} onChange={(e) => prop('showActivity', e.target.checked)} className="accent-[var(--messmer-copper)]" />
+                            <span className="text-sm text-[var(--messmer-ivory)]">Playing/Listening line</span>
+                        </label>
+                    </Row>
+                    <Row>
+                        <Label>Show activity image</Label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked={(element.props.showActivityImage as boolean) === true} onChange={(e) => prop('showActivityImage', e.target.checked)} className="accent-[var(--messmer-copper)]" />
+                            <span className="text-sm text-[var(--messmer-ivory)]">Game box art / album art</span>
+                        </label>
+                    </Row>
+                    <Row>
+                        <Label>Show Spotify bar</Label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked={(element.props.showSpotifyBar as boolean) === true} onChange={(e) => prop('showSpotifyBar', e.target.checked)} className="accent-[var(--messmer-copper)]" />
+                            <span className="text-sm text-[var(--messmer-ivory)]">Live Spotify now-playing</span>
+                        </label>
+                    </Row>
+                    <Row>
+                        <Label>Show avatar decoration</Label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked={(element.props.showAvatarDecoration as boolean) === true} onChange={(e) => prop('showAvatarDecoration', e.target.checked)} className="accent-[var(--messmer-copper)]" />
+                            <span className="text-sm text-[var(--messmer-ivory)]">Discord profile decoration</span>
+                        </label>
+                    </Row>
+                    <Row>
                         <Label>Avatar size</Label>
                         <StepperField value={(element.props.avatarSize as number) ?? 48} min={24} max={128} onChange={(v) => prop('avatarSize', v)} step={4} />
                     </Row>
@@ -1101,6 +1148,82 @@ export default function PropertiesPanel({
                     <Row>
                         <Label>Container radius</Label>
                         <Inp value={(element.props.containerRadius as string) ?? '12px'} placeholder="12px" onChange={(v) => prop('containerRadius', v)} />
+                    </Row>
+                </Section>
+            )}
+
+            {/* Badges */}
+            {element.type === 'badges' && (
+                <Section title="Badges">
+                    <p className="text-[10px] text-[var(--text-muted)] mb-2">Custom badges in a row, or use <code className="bg-white/10 px-1 rounded">source: platform</code> to show CursedBio platform badges (verified, early user, premium, staff) from your account.</p>
+                    <Row>
+                        <Label>Source</Label>
+                        <select
+                            value={(element.props.source as string) ?? 'custom'}
+                            onChange={(e) => prop('source', e.target.value)}
+                            className="w-full px-2 py-1.5 rounded bg-black/30 border border-white/15 text-sm text-[var(--messmer-ivory)]"
+                        >
+                            <option value="custom">Custom (define badges below)</option>
+                            <option value="platform">Platform (from account)</option>
+                        </select>
+                    </Row>
+                    {(element.props.source as string) !== 'platform' && (
+                        <>
+                            <Row>
+                                <Label>Badges (JSON)</Label>
+                                <p className="text-[10px] text-[var(--text-muted)]">Array of {`{ id, src, tooltip?, href? }`}</p>
+                            </Row>
+                            <Inp
+                                value={JSON.stringify((element.props.badges as unknown[]) ?? [], null, 2)}
+                                onChange={(v) => { try { prop('badges', JSON.parse(v || '[]')) } catch {} }}
+                                placeholder='[{"id":"verified","src":"...","tooltip":"Verified"}]'
+                                className="font-mono text-xs min-h-[80px]"
+                            />
+                        </>
+                    )}
+                    <StepperField label="Size" value={(element.props.size as number) ?? 28} min={16} max={64} onChange={(v) => prop('size', v)} step={4} />
+                    <StepperField label="Gap" value={(element.props.gap as number) ?? 8} min={0} max={24} onChange={(v) => prop('gap', v)} />
+                    <Row>
+                        <Label>Hover effect</Label>
+                        <select
+                            value={(element.props.hoverEffect as string) ?? 'lift'}
+                            onChange={(e) => prop('hoverEffect', e.target.value)}
+                            className="w-full px-2 py-1.5 rounded bg-black/30 border border-white/15 text-sm"
+                        >
+                            <option value="lift">Lift</option>
+                            <option value="scale">Scale</option>
+                            <option value="glow">Glow</option>
+                        </select>
+                    </Row>
+                </Section>
+            )}
+
+            {/* Spotify Now Playing */}
+            {element.type === 'spotifyNowPlaying' && (
+                <Section title="Spotify Now Playing">
+                    <p className="text-[10px] text-[var(--text-muted)] mb-2">Uses Lanyard to show live Spotify status. Enter a Discord user ID — they must be in the <a href="https://discord.gg/lanyard" target="_blank" rel="noopener noreferrer" className="text-[var(--accent-blue-soft)] underline">Lanyard server</a>.</p>
+                    <Row>
+                        <Label>Discord user ID</Label>
+                        <Inp value={(element.props.userId as string) ?? ''} placeholder="e.g. 94490510688792576" onChange={(v) => prop('userId', v)} />
+                    </Row>
+                    <Row>
+                        <Label>Show progress bar</Label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked={(element.props.showProgress as boolean) !== false} onChange={(e) => prop('showProgress', e.target.checked)} className="accent-[var(--messmer-copper)]" />
+                            <span className="text-sm text-[var(--messmer-ivory)]">Progress bar</span>
+                        </label>
+                    </Row>
+                    <Row>
+                        <Label>Show album art</Label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked={(element.props.showAlbumArt as boolean) !== false} onChange={(e) => prop('showAlbumArt', e.target.checked)} className="accent-[var(--messmer-copper)]" />
+                            <span className="text-sm text-[var(--messmer-ivory)]">Album art</span>
+                        </label>
+                    </Row>
+                    <AlphaColorRow label="Accent color" value={(element.props.accentColor as string) ?? '#1db954'} onChange={(v) => prop('accentColor', v)} />
+                    <Row>
+                        <Label>Idle text (when not listening)</Label>
+                        <Inp value={(element.props.idleText as string) ?? 'not listening'} placeholder="not listening" onChange={(v) => prop('idleText', v)} />
                     </Row>
                 </Section>
             )}

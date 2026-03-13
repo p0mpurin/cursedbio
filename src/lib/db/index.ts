@@ -99,7 +99,7 @@ export type PageElement = {
   id: string
   /** Friendly name shown in layers panel */
   name?: string
-  type: 'text' | 'image' | 'audio' | 'video' | 'embed' | 'shape' | 'div' | 'button' | 'profileViews' | 'discordProfile' | 'html'
+  type: 'text' | 'image' | 'audio' | 'video' | 'embed' | 'shape' | 'div' | 'button' | 'profileViews' | 'discordProfile' | 'spotifyNowPlaying' | 'badges' | 'html'
   x: number
   y: number
   width: number

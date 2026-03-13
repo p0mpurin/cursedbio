@@ -134,7 +134,7 @@ All optional except `width` and `height` in practice.
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `id` | string | ✓ | Unique ID, e.g. `"name"`, `"avatar"`, `"btn-spotify"` |
-| `type` | string | ✓ | One of: `text`, `image`, `audio`, `video`, `embed`, `shape`, `div`, `button`, `profileViews`, `discordProfile`, `html` |
+| `type` | string | ✓ | One of: `text`, `image`, `audio`, `video`, `embed`, `shape`, `div`, `button`, `profileViews`, `discordProfile`, `spotifyNowPlaying`, `badges`, `html` |
 | `name` | string | | Label in layers panel |
 | `x` | number | ✓ | Left position (px) |
 | `y` | number | ✓ | Top position (px) |
@@ -171,6 +171,8 @@ All optional except `width` and `height` in practice.
 | `typewriterDeleteSpeed` | number | ms per character when deleting |
 | `typewriterPauseAtEnd` | number | Pause (ms) before deleting; default 1500 |
 | `typewriterLoop` | boolean | Loop typewriter (default true) |
+| `usernameEffect` | string | Per-character/name effect: `"rainbow"` \| `"shimmer"` \| `"glitch"` \| `"chromatic"` \| `"neon"` |
+| `usernameEffectSpeed` | number | Animation speed multiplier (default 1.5; higher = faster) |
 | `opacity` | number | 0–1 |
 
 ---
@@ -302,13 +304,17 @@ Glass/frosted panel. Other elements can set `pinnedTo` to this element’s `id` 
 
 ### 10. Discord profile — `type: "discordProfile"`
 
-Shows Discord avatar, username, badges, status (via Lanyard if user is in Lanyard server). User must link Discord in dashboard.
+Real-time Discord status, activity, custom status, avatar decoration, and animated avatar (via Lanyard). User must link Discord in dashboard. Join the [Lanyard Discord server](https://discord.gg/lanyard) for live activity/game display.
 
 | Prop | Type | Description |
 |------|------|-------------|
 | `showAvatar` | boolean | Default true |
 | `showUsername` | boolean | Default true |
 | `showBadges` | boolean | Default true |
+| `showActivity` | boolean | Shows game/app being played (e.g. "Playing Valorant") — from Lanyard |
+| `showActivityImage` | boolean | Game box art from Discord RPC — from Lanyard |
+| `showSpotifyBar` | boolean | Live Spotify now-playing from Lanyard (track, album art) |
+| `showAvatarDecoration` | boolean | Discord profile decoration overlay on avatar |
 | `avatarSize` | number | px |
 | `fontSize` | number | Username font size |
 | `color` | string | Username color |
@@ -321,7 +327,58 @@ Shows Discord avatar, username, badges, status (via Lanyard if user is in Lanyar
 
 ---
 
-### 11. Custom HTML — `type: "html"`
+### 11. Spotify now-playing — `type: "spotifyNowPlaying"`
+
+Live track, album art, progress bar, artist name — pulled from Lanyard or Spotify. Use a Discord user ID (via Lanyard) to show what they're listening to in real time.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `userId` | string | Discord user ID — fetches from Lanyard (user must be in Lanyard server) |
+| `showProgress` | boolean | Show progress bar (default true) |
+| `showAlbumArt` | boolean | Show album art (default true) |
+| `accentColor` | string | Accent color, e.g. `"#1db954"` (Spotify green) |
+| `idleText` | string | Text when not listening, e.g. `"not listening"` |
+| `opacity` | number | 0–1 |
+
+---
+
+### 12. Badges — `type: "badges"`
+
+Dedicated badge strip showing an image + optional tooltip on hover. Badges sit in a row. Supports custom user-uploaded badges and platform badges (verified, early user, premium, staff).
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `badges` | array | `[{ id, src, tooltip, href? }]` — custom badges. Omit or empty when using platform badges. |
+| `source` | string | `"custom"` — use `badges` array. `"platform"` — pull from CursedBio user account (`publicMetadata.platformBadges`). |
+| `size` | number | Badge size in px (default 28) |
+| `gap` | number | Gap between badges (default 8) |
+| `hoverEffect` | string | `"lift"` \| `"glow"` \| `"scale"` (default `"lift"`) |
+| `opacity` | number | 0–1 |
+
+**Example — custom badges:**
+```json
+{
+  "id": "badges",
+  "type": "badges",
+  "x": 100, "y": 50, "width": 200, "height": 36, "zIndex": 20,
+  "props": {
+    "source": "custom",
+    "badges": [
+      { "id": "verified", "src": "https://example.com/verified.svg", "tooltip": "Verified", "href": "https://..." },
+      { "id": "og", "src": "https://example.com/og.svg", "tooltip": "OG User" }
+    ],
+    "size": 28,
+    "gap": 8,
+    "hoverEffect": "lift"
+  }
+}
+```
+
+**Platform badges** — When `source: "platform"`, badges come from the user's CursedBio account (e.g. verified, early_user, premium, staff). Awards are managed by the platform, not in the JSON.
+
+---
+
+### 13. Custom HTML — `type: "html"`
 
 Raw HTML for icons, SVGs, or custom widgets. Use **Element CSS** for glow, hover, and animations. Works like a button when `href` is set.
 
