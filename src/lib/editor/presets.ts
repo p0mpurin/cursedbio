@@ -79,3 +79,67 @@ export function removeFavorite(index: number): void {
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs))
   window.dispatchEvent(new CustomEvent('cursedbio-favorites-updated'))
 }
+
+/** Block presets: multi-element sections. Each element gets a generated id. */
+export type BlockPreset = {
+  id: string
+  name: string
+  /** Elements without id (we generate). Width/height from canvas. */
+  elements: Array<Omit<import('@/lib/db').PageElement, 'id'>>
+}
+
+export const BLOCK_PRESETS: BlockPreset[] = [
+  {
+    id: 'social-links',
+    name: 'Social links row',
+    elements: [
+      {
+        type: 'button', x: 24, y: 40, width: 48, height: 48, zIndex: 15,
+        props: { label: '', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/github.svg', iconPosition: 'only', iconSize: 26, iconLinkHover: 'scale', href: 'https://github.com', backgroundColor: 'transparent', borderRadius: '50%' }
+      },
+      {
+        type: 'button', x: 80, y: 40, width: 48, height: 48, zIndex: 15,
+        props: { label: '', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/twitter.svg', iconPosition: 'only', iconSize: 26, iconLinkHover: 'scale', href: 'https://twitter.com', backgroundColor: 'transparent', borderRadius: '50%' }
+      },
+      {
+        type: 'button', x: 136, y: 40, width: 48, height: 48, zIndex: 15,
+        props: { label: '', icon: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/instagram.svg', iconPosition: 'only', iconSize: 26, iconLinkHover: 'scale', href: 'https://instagram.com', backgroundColor: 'transparent', borderRadius: '50%' }
+      },
+    ],
+  },
+  {
+    id: 'about-card',
+    name: 'About me card',
+    elements: [
+      {
+        type: 'div', name: 'Card', x: 24, y: 80, width: 342, height: 180, zIndex: 1,
+        props: { backgroundColor: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '16px' }
+      },
+      { type: 'text', name: 'Title', x: 40, y: 24, width: 294, height: 28, zIndex: 5, pinnedTo: '__CONTAINER__', props: { content: 'About Me', fontSize: 18, fontFamily: 'Inter', color: '#E0DAC9', fontWeight: '600' } },
+      { type: 'text', name: 'Bio', x: 40, y: 58, width: 294, height: 100, zIndex: 5, pinnedTo: '__CONTAINER__', props: { content: 'Short bio or tagline here. Edit this text.', fontSize: 14, fontFamily: 'Inter', color: '#9a958c', lineHeight: 1.5 } },
+    ],
+  },
+  {
+    id: 'music-links',
+    name: 'Music + links',
+    elements: [
+      {
+        type: 'button', x: 24, y: 40, width: 342, height: 48, zIndex: 12,
+        props: { label: 'Listen on Spotify', href: 'https://spotify.com', backgroundColor: '#1DB954', color: '#fff', borderRadius: '24px', fontSize: 15 }
+      },
+      {
+        type: 'button', x: 24, y: 100, width: 342, height: 48, zIndex: 12,
+        props: { label: 'Bandcamp', href: 'https://bandcamp.com', backgroundColor: '#1da0c3', color: '#fff', borderRadius: '24px', fontSize: 15 }
+      },
+    ],
+  },
+]
+
+/** Style props to copy per element type (for copy/paste style) */
+export const STYLE_PROPS_BY_TYPE: Record<string, string[]> = {
+  text: ['fontFamily', 'fontSize', 'fontWeight', 'color', 'textAlign', 'lineHeight', 'letterSpacing', 'textShadow', 'webkitTextStroke', 'opacity'],
+  button: ['backgroundColor', 'color', 'border', 'borderRadius', 'fontSize', 'boxShadow', 'opacity'],
+  shape: ['backgroundColor', 'background', 'borderRadius', 'border', 'boxShadow', 'opacity'],
+  div: ['backgroundColor', 'backdropFilter', 'background', 'border', 'borderRadius', 'boxShadow', 'opacity'],
+  image: ['borderRadius', 'border', 'boxShadow', 'objectFit', 'opacity', 'filterBrightness', 'filterContrast', 'filterSaturate', 'filterBlur'],
+}

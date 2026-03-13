@@ -102,6 +102,11 @@ export default function EditorPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [activeVariant, setActiveVariant] = useState<'desktop' | 'mobile'>('desktop')
 
+  // Undo/redo history (max 50 steps)
+  const historyRef = useRef<Array<PageLayout | ResponsivePageLayout>>([])
+  const historyIndexRef = useRef(-1)
+  const [historyVersion, setHistoryVersion] = useState(0)
+
   // Load saved layout from API (persists across dev restarts)
   useEffect(() => {
     if (!isLoaded) return
@@ -122,14 +127,62 @@ export default function EditorPage() {
 
   const effectiveLayout = getEditableLayout(layout, activeVariant)
 
+  const pushHistory = useCallback((state: PageLayout | ResponsivePageLayout) => {
+    const h = historyRef.current
+    const idx = historyIndexRef.current
+    const trimmed = idx < 0 ? h : h.slice(0, idx + 1)
+    trimmed.push(JSON.parse(JSON.stringify(state)))
+    if (trimmed.length > 50) trimmed.shift()
+    historyRef.current = trimmed
+    historyIndexRef.current = trimmed.length - 1
+  }, [])
+
   const setEffectiveLayout = useCallback((updated: PageLayout | ((prev: PageLayout) => PageLayout)) => {
     setLayout((prev) => {
       const next = typeof updated === 'function' ? updated(getEditableLayout(prev, activeVariant)) : updated
-      if (!isResponsiveLayout(prev)) return next
-      // Cascade: when editing desktop, sync scaled changes to mobile so you don't have to repeat
-      return updateLayoutWithCascade(prev, activeVariant, next)
+      const result = !isResponsiveLayout(prev) ? next : updateLayoutWithCascade(prev, activeVariant, next)
+      pushHistory(result)
+      setHistoryVersion((v) => v + 1)
+      return result
     })
-  }, [activeVariant])
+  }, [activeVariant, pushHistory])
+
+  const handleUndo = useCallback(() => {
+    const h = historyRef.current
+    const idx = historyIndexRef.current
+    if (idx <= 0) return
+    historyIndexRef.current = idx - 1
+    setLayout(h[idx - 1])
+    setHistoryVersion((v) => v + 1)
+  }, [])
+
+  const handleRedo = useCallback(() => {
+    const h = historyRef.current
+    const idx = historyIndexRef.current
+    if (idx >= h.length - 1) return
+    historyIndexRef.current = idx + 1
+    setLayout(h[idx + 1])
+    setHistoryVersion((v) => v + 1)
+  }, [])
+
+  const [canUndo, setCanUndo] = useState(false)
+  const [canRedo, setCanRedo] = useState(false)
+  useEffect(() => {
+    setCanUndo(historyIndexRef.current > 0)
+    setCanRedo(historyIndexRef.current >= 0 && historyIndexRef.current < historyRef.current.length - 1)
+  }, [historyVersion])
+
+  // Initialize history with current layout when loaded (once)
+  const historyInitialized = useRef(false)
+  useEffect(() => {
+    if (layoutLoaded && !historyInitialized.current) {
+      historyInitialized.current = true
+      pushHistory(layout)
+      historyIndexRef.current = 0
+      setHistoryVersion((v) => v + 1)
+    }
+  }, [layoutLoaded, layout, pushHistory])
+
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isPanning, setIsPanning] = useState(false)
@@ -141,6 +194,25 @@ export default function EditorPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [rightTab, setRightTab] = useState<'properties' | 'page'>('page')
+  const copiedStyleRef = useRef<{ type: string; props: Record<string, unknown> } | null>(null)
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z') {
+          e.preventDefault()
+          if (e.shiftKey) handleRedo()
+          else handleUndo()
+        }
+        if (e.key === 'y') {
+          e.preventDefault()
+          handleRedo()
+        }
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [handleUndo, handleRedo])
 
   // Auth check overlay while preserving editor for dev
   const [isDevAuthMode, setIsDevAuthMode] = useState(false)
@@ -171,6 +243,20 @@ export default function EditorPage() {
     setEffectiveLayout((prev) => ({ ...prev, elements: [...prev.elements, el] }))
     setSelectedId(el.id)
   }, [setEffectiveLayout])
+
+  const handleAddBlock = useCallback((elements: Array<Omit<PageElement, 'id'>>) => {
+    const baseId = `el-${Date.now()}`
+    const containerId = elements.find((e) => e.type === 'div') ? `${baseId}-0` : undefined
+    const withIds: PageElement[] = elements.map((template, i) => {
+      const id = `${baseId}-${i}`
+      const pinnedTo = template.pinnedTo === '__CONTAINER__' ? containerId : template.pinnedTo
+      return { ...template, id, pinnedTo } as PageElement
+    })
+    const maxZ = effectiveLayout.elements.reduce((m, e) => Math.max(m, e.zIndex), 0)
+    const adjusted = withIds.map((e, i) => ({ ...e, zIndex: maxZ + i + 1 }))
+    setEffectiveLayout((prev) => ({ ...prev, elements: [...prev.elements, ...adjusted] }))
+    setSelectedId(adjusted[0]?.id ?? null)
+  }, [setEffectiveLayout, effectiveLayout.elements])
 
   const handleUpdateElement = useCallback((id: string, updates: Partial<PageElement>) => {
     setEffectiveLayout((prev) => ({
@@ -291,6 +377,10 @@ export default function EditorPage() {
       <header className="h-14 shrink-0 border-b border-white/5 bg-[var(--bg-secondary)] flex items-center justify-between px-4 z-50">
         <div className="flex items-center gap-4">
           <button onClick={() => router.push('/')} className="text-xl font-bold font-serif text-[var(--messmer-copper)] hover:text-white transition">CB</button>
+          <div className="flex rounded border border-white/10 overflow-hidden">
+            <button onClick={handleUndo} disabled={!canUndo} className="px-2 py-1.5 text-xs disabled:opacity-40 hover:bg-white/5" title="Undo (Ctrl+Z)">↶</button>
+            <button onClick={handleRedo} disabled={!canRedo} className="px-2 py-1.5 text-xs disabled:opacity-40 hover:bg-white/5 border-l border-white/10" title="Redo (Ctrl+Y)">↷</button>
+          </div>
           {/* Viewport toggle – edit desktop or phone variant */}
           {isResponsiveLayout(layout) && (
             <div className="flex items-center rounded border border-white/10 overflow-hidden">
@@ -352,6 +442,7 @@ export default function EditorPage() {
         <EditorSidebar
           elements={effectiveLayout.elements}
           onAddElement={handleAddElement}
+          onAddBlock={handleAddBlock}
           selectedId={selectedId}
           onSelect={setSelectedId}
           onUpdateElement={handleUpdateElement}
@@ -411,6 +502,7 @@ export default function EditorPage() {
                 onDuplicate={handleDuplicateElement}
                 layout={effectiveLayout}
                 onAppendPageCss={handleAppendPageCss}
+                copiedStyleRef={copiedStyleRef}
               />
             ) : (
               <PageSettingsPanel

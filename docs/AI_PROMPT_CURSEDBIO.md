@@ -17,6 +17,12 @@ CursedBio provides these quick-apply tools. When suggesting JSON, you can align 
 - **CSS snippets** — Glow text, Hover all buttons, Card shadow, Avatar float
 - **Export / Import** — Copy layout JSON to clipboard; Import from clipboard
 - **Element favorites** — Save any element for reuse; add from Favorites in the sidebar
+- **Per-element custom CSS** — Text, image, button, shape, div; use `{{id}}` in Element CSS
+- **Copy/paste style** — Copy style from one element, paste to another (same type)
+- **Undo/redo** — History stack (Ctrl+Z / Ctrl+Y)
+- **Color palette** — Primary, secondary, accent; use `var(--cursedbio-primary)` in elements
+- **Block presets** — Social links row, About me card, Music + links
+- **Custom fonts** — Add by Google Fonts link or upload .woff2/.woff
 
 ---
 
@@ -92,6 +98,8 @@ All optional except `width` and `height` in practice.
 | `customCursor` | string | URL of cursor image (.cur or .png) |
 | `customCursorHotspotX` | number | Cursor hotspot X (px) |
 | `customCursorHotspotY` | number | Cursor hotspot Y (px) |
+| `themeColors` | object | `{ primary?: string, secondary?: string, accent?: string }` — CSS vars --cursedbio-primary etc. |
+| `customFonts` | array | `[{ family, link }]` (Google Fonts) or `[{ family, url, format? }]` (upload) |
 
 ### Theme preset values (for AI reference)
 

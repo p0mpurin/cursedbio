@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react'
 import type { PageElement } from '@/lib/db'
 import HierarchyGraph from './HierarchyGraph'
-import { getFavorites, removeFavorite, type FavoriteElement } from '@/lib/editor/presets'
+import { getFavorites, removeFavorite, BLOCK_PRESETS, type FavoriteElement } from '@/lib/editor/presets'
 
 /** Primary elements - shown first, most commonly used */
 const PRIMARY_ELEMENTS: Array<{ label: string; icon: string; template: Omit<PageElement, 'id'> }> = [
@@ -163,12 +163,14 @@ const MORE_ELEMENTS: Array<{ label: string; icon: string; template: Omit<PageEle
 
 export default function EditorSidebar({
   onAddElement,
+  onAddBlock,
   selectedId,
   onSelect,
   elements,
   onUpdateElement,
 }: {
   onAddElement: (el: PageElement) => void
+  onAddBlock?: (elements: Array<Omit<PageElement, 'id'>>) => void
   selectedId: string | null
   onSelect: (id: string | null) => void
   elements: PageElement[]
@@ -222,7 +224,25 @@ export default function EditorSidebar({
         {activeTab === 'elements' && (
           <div className="space-y-4">
             <p className="text-xs text-[var(--text-muted)]">Click to add inside your content area:</p>
-            <div className="space-y-2">
+            {onAddBlock && BLOCK_PRESETS.length > 0 && (
+            <div className="mb-4">
+              <p className="text-xs text-[var(--text-muted)] mb-2">Blocks (multi-element)</p>
+              <div className="space-y-2">
+                {BLOCK_PRESETS.map((block) => (
+                  <button
+                    key={block.id}
+                    type="button"
+                    onClick={() => onAddBlock(block.elements)}
+                    className="w-full flex items-center gap-3 p-3 rounded-lg bg-violet-500/10 hover:bg-violet-500/20 text-left text-sm transition border border-violet-500/20"
+                  >
+                    <span className="text-violet-400">▦</span>
+                    <span className="text-[var(--text-primary)]">{block.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="space-y-2">
               {PRIMARY_ELEMENTS.map((tpl) => (
                 <button
                   key={tpl.label}

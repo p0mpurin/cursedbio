@@ -1787,9 +1787,26 @@ export default function BioCanvas({
           src={c.backgroundVideo}
         />
       )}
+      {/* Theme color palette as CSS variables */}
+      {c.themeColors && (c.themeColors.primary || c.themeColors.secondary || c.themeColors.accent) && (
+        <style dangerouslySetInnerHTML={{ __html: `:root{${c.themeColors.primary ? `--cursedbio-primary:${c.themeColors.primary};` : ''}${c.themeColors.secondary ? `--cursedbio-secondary:${c.themeColors.secondary};` : ''}${c.themeColors.accent ? `--cursedbio-accent:${c.themeColors.accent};` : ''}}` }} />
+      )}
+      {/* Custom fonts: @font-face or link */}
+      {c.customFonts?.map((f, i) => (
+        'link' in f ? (
+          <link key={i} rel="stylesheet" href={f.link} />
+        ) : (
+          <style key={i} dangerouslySetInnerHTML={{ __html: `@font-face{font-family:"${f.family.replace(/"/g, '\\"')}";src:url("${f.url}")${f.format ? ` format("${f.format}")` : ''};font-display:swap}` }} />
+        )
+      ))}
       {/* Button base styles from CSS vars so customCss :hover can override */}
       <style dangerouslySetInnerHTML={{ __html: '[data-element-type="button"] a,[data-element-type="button"] button{background:var(--bio-btn-bg,#B66E41);border:var(--bio-btn-border,none);}' }} />
       {c.customCss && <style dangerouslySetInnerHTML={{ __html: c.customCss }} />}
+      {/* Per-element custom CSS (text, image, button, shape, div, html) */}
+      {(() => {
+        const parts = layout.elements.map((el) => { const css = (el.props.customCss as string) || ''; if (!css) return ''; return css.replace(/\{\{id\}\}/g, el.id) }).filter(Boolean)
+        return parts.length ? <style dangerouslySetInnerHTML={{ __html: parts.join('\n\n') }} /> : null
+      })()}
       {showGuides && isEditMode && <CanvasGuides width={c.width} height={c.height} />}
       <div className="relative z-10 w-full h-full" style={{ isolation: 'isolate' }}>
       {isEditMode ? (

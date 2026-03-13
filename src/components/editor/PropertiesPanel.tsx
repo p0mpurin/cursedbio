@@ -6,7 +6,7 @@
  */
 import { useRef, useState } from 'react'
 import type { PageElement, PageLayout } from '@/lib/db'
-import { CONTAINER_PRESETS, BUTTON_PRESETS, TYPOGRAPHY_PRESETS, ANIMATION_SNIPPETS, addFavorite } from '@/lib/editor/presets'
+import { CONTAINER_PRESETS, BUTTON_PRESETS, TYPOGRAPHY_PRESETS, ANIMATION_SNIPPETS, addFavorite, STYLE_PROPS_BY_TYPE } from '@/lib/editor/presets'
 
 function CollapsibleSection({ title, children, defaultOpen = false, defaultCollapsed }: { title: string; children: React.ReactNode; defaultOpen?: boolean; defaultCollapsed?: boolean }) {
     const [open, setOpen] = useState(defaultCollapsed !== undefined ? !defaultCollapsed : defaultOpen)
@@ -467,6 +467,7 @@ export default function PropertiesPanel({
     onDuplicate,
     layout,
     onAppendPageCss,
+    copiedStyleRef,
 }: {
     element: PageElement | null
     onUpdate: (id: string, updates: Partial<PageElement>) => void
@@ -474,6 +475,7 @@ export default function PropertiesPanel({
     onDuplicate: (id: string) => void
     layout?: PageLayout | null
     onAppendPageCss?: (snippet: string) => void
+    copiedStyleRef?: React.MutableRefObject<{ type: string; props: Record<string, unknown> } | null>
 }) {
     if (!element) {
         return (
@@ -519,6 +521,39 @@ export default function PropertiesPanel({
                 >
                     ★ Favorites
                 </button>
+                {copiedStyleRef && STYLE_PROPS_BY_TYPE[element.type] && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const keys = STYLE_PROPS_BY_TYPE[element.type] || []
+                        const props: Record<string, unknown> = {}
+                        keys.forEach((k) => { if (element.props[k] !== undefined) props[k] = element.props[k] })
+                        copiedStyleRef.current = { type: element.type, props }
+                        window.dispatchEvent(new CustomEvent('cursedbio-toast', { detail: { message: 'Style copied' } }))
+                      }}
+                      className="py-1.5 px-2 rounded-md bg-white/5 hover:bg-white/10 text-xs transition border border-white/10"
+                    >
+                      Copy style
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const copied = copiedStyleRef?.current
+                        if (!copied || copied.type !== element.type) {
+                          window.dispatchEvent(new CustomEvent('cursedbio-toast', { detail: { message: 'No matching style copied' } }))
+                          return
+                        }
+                        upd({ props: { ...element.props, ...copied.props } })
+                        window.dispatchEvent(new CustomEvent('cursedbio-toast', { detail: { message: 'Style pasted' } }))
+                      }}
+                      disabled={!copiedStyleRef?.current || copiedStyleRef.current.type !== element.type}
+                      className="py-1.5 px-2 rounded-md bg-white/5 hover:bg-white/10 text-xs transition border border-white/10 disabled:opacity-40"
+                    >
+                      Paste style
+                    </button>
+                  </>
+                )}
                 <span className="text-[10px] text-[var(--text-muted)] self-center">Ctrl+C / Ctrl+V to copy</span>
             </div>
 
@@ -666,7 +701,10 @@ export default function PropertiesPanel({
                             onChange={(e) => prop('fontFamily', e.target.value)}
                             className="w-full bg-white/5 border border-white/10 rounded-md px-2 py-1.5 text-sm text-[var(--messmer-ivory)] focus:outline-none focus:border-[var(--messmer-copper)]/60 transition"
                         >
-                            {GOOGLE_FONTS.map((f) => (
+                            {[
+                                ...(layout?.canvas?.customFonts?.map((f: { family?: string }) => f.family).filter(Boolean) || []),
+                                ...GOOGLE_FONTS,
+                            ].filter((v, i, a) => v && a.indexOf(v) === i).map((f) => (
                                 <option key={f} value={f} className="bg-[#1a1714]">{f}</option>
                             ))}
                         </select>
@@ -1386,6 +1424,20 @@ export default function PropertiesPanel({
                         label="Box Shadow"
                         value={(element.props.boxShadow as string) ?? ''}
                         onChange={(v) => prop('boxShadow', v)}
+                    />
+                </Section>
+            )}
+
+            {/* Per-element custom CSS (text, image, button, shape, div — html has its own) */}
+            {['text', 'image', 'button', 'shape', 'div'].includes(element.type) && (
+                <Section title="Element CSS">
+                    <p className="text-[10px] text-[var(--text-muted)] mb-2">Use {"{{id}}"} to scope to this element. Applied with page CSS.</p>
+                    <textarea
+                        value={(element.props.customCss as string) ?? ''}
+                        onChange={(e) => prop('customCss', e.target.value)}
+                        placeholder={'[data-element-id="{{id}}"] { }\n[data-element-id="{{id}}"]:hover { }'}
+                        className="w-full min-h-[80px] bg-white/5 border border-white/10 rounded-md px-2 py-1.5 text-xs font-mono text-[var(--messmer-ivory)] focus:outline-none focus:border-[var(--messmer-copper)]/60 resize-y"
+                        spellCheck={false}
                     />
                 </Section>
             )}

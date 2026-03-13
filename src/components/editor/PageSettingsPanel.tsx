@@ -116,6 +116,102 @@ function CursorUpload({ onUpload }: { onUpload: (url: string) => void }) {
     )
 }
 
+function FontUpload({ onUpload }: { onUpload: (url: string) => void }) {
+    const { ref, loading, handleChange } = useUpload('.woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf')
+    return (
+        <>
+            <input ref={ref} type="file" accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf" className="hidden" onChange={(e) => handleChange(e, onUpload)} />
+            <button type="button" disabled={loading} onClick={() => ref.current?.click()} className="shrink-0 px-2 py-1 rounded text-xs bg-[var(--messmer-copper)]/20 hover:bg-[var(--messmer-copper)]/30 border border-[var(--messmer-copper)]/40 transition disabled:opacity-50">
+                {loading ? '…' : 'Upload'}
+            </button>
+        </>
+    )
+}
+
+function AddFontByLink({ onAdd }: { onAdd: (f: { family: string; link: string }) => void }) {
+    const [link, setLink] = useState('')
+    return (
+        <div className="space-y-1">
+            <Label>Add by link (Google Fonts)</Label>
+            <div className="flex gap-2">
+                <input
+                    value={link}
+                    onChange={(e) => setLink(e.target.value)}
+                    placeholder="https://fonts.googleapis.com/css2?family=..."
+                    className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-md px-2 py-1.5 text-sm text-[var(--messmer-ivory)] focus:outline-none focus:border-[var(--messmer-copper)]/60"
+                />
+                <button
+                    type="button"
+                    onClick={() => {
+                        if (link.trim()) {
+                            const famMatch = link.match(/family=([^:&]+)/)
+                            const family = famMatch ? decodeURIComponent(famMatch[1]).replace(/\+/g, ' ') : 'Custom Font'
+                            onAdd({ family, link: link.trim() })
+                            setLink('')
+                        }
+                    }}
+                    className="shrink-0 px-2 py-1.5 rounded text-xs bg-[var(--messmer-copper)]/20 border border-[var(--messmer-copper)]/40"
+                >
+                    Add
+                </button>
+            </div>
+        </div>
+    )
+}
+
+function AddFontByUpload({ onAdd }: { onAdd: (f: { family: string; url: string; format?: string }) => void }) {
+    const [family, setFamily] = useState('')
+    const fontUploadRef = useRef<HTMLInputElement>(null)
+    const [uploading, setUploading] = useState(false)
+    return (
+        <div className="space-y-1">
+            <Label>Add by upload</Label>
+            <div className="flex gap-2 items-center">
+                <input
+                    value={family}
+                    onChange={(e) => setFamily(e.target.value)}
+                    placeholder="Font name"
+                    className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-md px-2 py-1.5 text-sm text-[var(--messmer-ivory)] focus:outline-none focus:border-[var(--messmer-copper)]/60"
+                />
+                <input
+                    ref={fontUploadRef}
+                    type="file"
+                    accept=".woff2,.woff,.ttf,.otf"
+                    className="hidden"
+                    onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file) return
+                        setUploading(true)
+                        e.target.value = ''
+                        try {
+                            const form = new FormData()
+                            form.append('file', file)
+                            const res = await fetch('/api/upload', { method: 'POST', body: form })
+                            if (!res.ok) throw new Error('Upload failed')
+                            const data = await res.json()
+                            if (data.url) {
+                                const format = file.name.endsWith('.woff2') ? 'woff2' : file.name.endsWith('.woff') ? 'woff' : undefined
+                                onAdd({ family: family.trim() || 'Custom Font', url: data.url, format })
+                                setFamily('')
+                            }
+                        } finally {
+                            setUploading(false)
+                        }
+                    }}
+                />
+                <button
+                    type="button"
+                    disabled={uploading}
+                    onClick={() => fontUploadRef.current?.click()}
+                    className="shrink-0 px-2 py-1.5 rounded text-xs bg-[var(--messmer-copper)]/20 border border-[var(--messmer-copper)]/40 disabled:opacity-50"
+                >
+                    {uploading ? '…' : 'Upload'}
+                </button>
+            </div>
+        </div>
+    )
+}
+
 export default function PageSettingsPanel({
     layout,
     onUpdate,
@@ -211,6 +307,56 @@ export default function PageSettingsPanel({
                             {t.name}
                         </button>
                     ))}
+                </div>
+            </Section>
+
+            <Section title="Color palette">
+                <p className="text-[10px] text-[var(--text-muted)] mb-2">Use in elements as var(--cursedbio-primary) etc.</p>
+                <div className="space-y-2">
+                    <div>
+                        <Label>Primary</Label>
+                        <div className="flex gap-2 items-center">
+                            <input
+                                type="color"
+                                value={c.themeColors?.primary || '#B66E41'}
+                                onChange={(e) => onUpdate({ themeColors: { ...c.themeColors, primary: e.target.value } })}
+                                className="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0"
+                            />
+                            <Inp value={c.themeColors?.primary || ''} onChange={(v) => onUpdate({ themeColors: { ...c.themeColors, primary: v || undefined } })} placeholder="#B66E41" />
+                        </div>
+                    </div>
+                    <div>
+                        <Label>Secondary</Label>
+                        <div className="flex gap-2 items-center">
+                            <input type="color" value={c.themeColors?.secondary || '#1a1512'} onChange={(e) => onUpdate({ themeColors: { ...c.themeColors, secondary: e.target.value } })} className="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0" />
+                            <Inp value={c.themeColors?.secondary || ''} onChange={(v) => onUpdate({ themeColors: { ...c.themeColors, secondary: v || undefined } })} placeholder="#1a1512" />
+                        </div>
+                    </div>
+                    <div>
+                        <Label>Accent</Label>
+                        <div className="flex gap-2 items-center">
+                            <input type="color" value={c.themeColors?.accent || '#fcd34d'} onChange={(e) => onUpdate({ themeColors: { ...c.themeColors, accent: e.target.value } })} className="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0" />
+                            <Inp value={c.themeColors?.accent || ''} onChange={(v) => onUpdate({ themeColors: { ...c.themeColors, accent: v || undefined } })} placeholder="#fcd34d" />
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <button type="button" onClick={() => onUpdate({ themeColors: { primary: '#B66E41', secondary: '#1a1512', accent: '#fcd34d' } })} className="px-2 py-1 text-xs bg-white/5 hover:bg-white/10 rounded border border-white/10">Default</button>
+                        <button type="button" onClick={() => onUpdate({ themeColors: undefined })} className="px-2 py-1 text-xs text-red-400/80 hover:bg-red-500/10 rounded border border-red-500/20">Clear</button>
+                    </div>
+                </div>
+            </Section>
+
+            <Section title="Custom fonts">
+                <p className="text-[10px] text-[var(--text-muted)] mb-2">Add by link (Google Fonts) or upload .woff2/.woff</p>
+                <div className="space-y-3">
+                    {c.customFonts?.map((f, i) => (
+                        <div key={i} className="p-2 rounded bg-white/5 border border-white/10 flex items-center justify-between gap-2">
+                            <span className="text-xs truncate">{(f as { family?: string }).family || (f as { link?: string }).link || 'Font'}</span>
+                            <button type="button" onClick={() => onUpdate({ customFonts: c.customFonts!.filter((_, j) => j !== i) })} className="shrink-0 text-red-400 text-xs hover:bg-red-500/20 px-1 rounded">×</button>
+                        </div>
+                    ))}
+                    <AddFontByLink onAdd={(f) => onUpdate({ customFonts: [...(c.customFonts || []), f] })} />
+                    <AddFontByUpload onAdd={(f) => onUpdate({ customFonts: [...(c.customFonts || []), f] })} />
                 </div>
             </Section>
 

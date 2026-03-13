@@ -86,6 +86,10 @@ export type PageLayout = {
     customCursorHotspotX?: number
     /** Hotspot Y for cursor (px from top-left). Default 0. */
     customCursorHotspotY?: number
+    /** Theme color palette - CSS vars --cursedbio-primary, --cursedbio-secondary, --cursedbio-accent */
+    themeColors?: { primary?: string; secondary?: string; accent?: string }
+    /** Custom fonts: @font-face definitions. Each has family and url (or link for Google Fonts). */
+    customFonts?: Array<{ family: string; url: string; format?: string } | { family: string; link: string }>
   }
   elements: PageElement[]
 }
