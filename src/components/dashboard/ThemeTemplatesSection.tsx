@@ -127,7 +127,7 @@ export default function ThemeTemplatesSection({
       layout = template
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(layout))
-    router.push('/editor')
+    router.push('/editor?from=template')
   }
 
   return (

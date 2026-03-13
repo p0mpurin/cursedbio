@@ -58,7 +58,9 @@ export default async function DashboardPage() {
           </h1>
           <p className="text-[var(--text-muted)] mb-6">
             Your page:{' '}
-            <span className="text-[var(--accent-blue-soft)] font-mono">/{pageSlug}</span>
+            <Link href={`/${pageSlug}`} className="text-[var(--accent-blue-soft)] font-mono hover:underline" target="_blank" rel="noopener noreferrer">
+              /{pageSlug}
+            </Link>
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link

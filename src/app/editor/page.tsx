@@ -108,8 +108,15 @@ export default function EditorPage() {
   const [historyVersion, setHistoryVersion] = useState(0)
 
   // Load saved layout from API (persists across dev restarts)
+  // Skip overwrite when coming from template apply (?from=template) so user sees their applied template
   useEffect(() => {
     if (!isLoaded) return
+    const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
+    const fromTemplate = params?.get('from') === 'template'
+    if (fromTemplate) {
+      setLayoutLoaded(true)
+      return
+    }
     let cancelled = false
     fetch('/api/pages')
       .then((r) => r.json())
@@ -196,24 +203,6 @@ export default function EditorPage() {
   const [rightTab, setRightTab] = useState<'properties' | 'page'>('page')
   const copiedStyleRef = useRef<{ type: string; props: Record<string, unknown> } | null>(null)
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        if (e.key === 'z') {
-          e.preventDefault()
-          if (e.shiftKey) handleRedo()
-          else handleUndo()
-        }
-        if (e.key === 'y') {
-          e.preventDefault()
-          handleRedo()
-        }
-      }
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [handleUndo, handleRedo])
-
   // Auth check overlay while preserving editor for dev
   const [isDevAuthMode, setIsDevAuthMode] = useState(false)
 
@@ -272,6 +261,31 @@ export default function EditorPage() {
     }))
     if (selectedId === id) setSelectedId(null)
   }, [selectedId, setEffectiveLayout])
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z') {
+          e.preventDefault()
+          if (e.shiftKey) handleRedo()
+          else handleUndo()
+        }
+        if (e.key === 'y') {
+          e.preventDefault()
+          handleRedo()
+        }
+      }
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) {
+        const target = e.target as HTMLElement
+        if (!target?.closest?.('input, textarea, [contenteditable="true"]')) {
+          e.preventDefault()
+          handleDeleteElement(selectedId)
+        }
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [handleUndo, handleRedo, selectedId, handleDeleteElement])
 
   const handleDuplicateElement = useCallback((id: string) => {
     setEffectiveLayout((prev) => {
@@ -377,9 +391,9 @@ export default function EditorPage() {
       <header className="h-14 shrink-0 border-b border-white/5 bg-[var(--bg-secondary)] flex items-center justify-between px-4 z-50">
         <div className="flex items-center gap-4">
           <button onClick={() => router.push('/')} className="text-xl font-bold font-serif text-[var(--messmer-copper)] hover:text-white transition">CB</button>
-          <div className="flex rounded border border-white/10 overflow-hidden">
-            <button onClick={handleUndo} disabled={!canUndo} className="px-2 py-1.5 text-xs disabled:opacity-40 hover:bg-white/5" title="Undo (Ctrl+Z)">↶</button>
-            <button onClick={handleRedo} disabled={!canRedo} className="px-2 py-1.5 text-xs disabled:opacity-40 hover:bg-white/5 border-l border-white/10" title="Redo (Ctrl+Y)">↷</button>
+          <div className="flex rounded border border-white/10 overflow-hidden" role="group" aria-label="History">
+            <button onClick={handleUndo} disabled={!canUndo} className="px-2 py-1.5 text-xs disabled:opacity-40 hover:bg-white/5" title="Undo (Ctrl+Z)" aria-label="Undo">↶</button>
+            <button onClick={handleRedo} disabled={!canRedo} className="px-2 py-1.5 text-xs disabled:opacity-40 hover:bg-white/5 border-l border-white/10" title="Redo (Ctrl+Y)" aria-label="Redo">↷</button>
           </div>
           {/* Viewport toggle – edit desktop or phone variant */}
           {isResponsiveLayout(layout) && (
@@ -403,11 +417,11 @@ export default function EditorPage() {
         <div className="flex items-center gap-6">
           {/* Zoom and pan */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center bg-black/20 rounded border border-white/5">
-              <button onClick={() => setZoom(z => Math.max(0.2, z - 0.1))} className="px-2 py-1 hover:text-white hover:bg-white/5">-</button>
-              <span className="text-xs px-2 min-w-[50px] text-center">{Math.round(zoom * 100)}%</span>
-              <button onClick={() => setZoom(z => Math.min(3, z + 0.1))} className="px-2 py-1 hover:text-white hover:bg-white/5">+</button>
-              <button onClick={handleFitZoom} className="px-2 py-1 text-xs border-l border-white/5 hover:text-white hover:bg-white/5">Fit</button>
+            <div className="flex items-center bg-black/20 rounded border border-white/5" role="group" aria-label="Zoom">
+              <button onClick={() => setZoom(z => Math.max(0.2, z - 0.1))} className="px-2 py-1 hover:text-white hover:bg-white/5" aria-label="Zoom out">-</button>
+              <span className="text-xs px-2 min-w-[50px] text-center" aria-live="polite">{Math.round(zoom * 100)}%</span>
+              <button onClick={() => setZoom(z => Math.min(3, z + 0.1))} className="px-2 py-1 hover:text-white hover:bg-white/5" aria-label="Zoom in">+</button>
+              <button onClick={handleFitZoom} className="px-2 py-1 text-xs border-l border-white/5 hover:text-white hover:bg-white/5" aria-label="Fit to view">Fit</button>
             </div>
             <span className="text-[10px] text-[var(--text-muted)] hidden sm:inline">Middle mouse to pan</span>
           </div>
