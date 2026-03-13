@@ -11,6 +11,7 @@ import { supabaseAdmin } from '@/lib/db'
 import ProfileInfoCard from '@/components/dashboard/ProfileInfoCard'
 import DiscordConnectSection from '@/components/dashboard/DiscordConnectSection'
 import SimpleLayoutsSection from '@/components/dashboard/SimpleLayoutsSection'
+import ThemeTemplatesSection from '@/components/dashboard/ThemeTemplatesSection'
 import TemplateGallery from '@/components/dashboard/TemplateGallery'
 import UrlClaimSection from '@/components/dashboard/UrlClaimSection'
 import { TEMPLATES } from '@/lib/editor/templates'
@@ -77,6 +78,9 @@ export default async function DashboardPage() {
             Open the editor and click Preview to see your page live
           </p>
         </section>
+
+        {/* Theme templates - pick template, fill settings, apply */}
+        <ThemeTemplatesSection defaultUsername={username} defaultDisplayName={displayName} />
 
         {/* Simple layouts - pick one and fill in your info */}
         <section className="mb-12">
