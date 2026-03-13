@@ -1181,8 +1181,14 @@ export default function PropertiesPanel({
                             />
                         </>
                     )}
-                    <StepperField label="Size" value={(element.props.size as number) ?? 28} min={16} max={64} onChange={(v) => prop('size', v)} step={4} />
-                    <StepperField label="Gap" value={(element.props.gap as number) ?? 8} min={0} max={24} onChange={(v) => prop('gap', v)} />
+                    <Row>
+                        <Label>Size</Label>
+                        <StepperField value={(element.props.size as number) ?? 28} min={16} max={64} onChange={(v) => prop('size', v)} step={4} />
+                    </Row>
+                    <Row>
+                        <Label>Gap</Label>
+                        <StepperField value={(element.props.gap as number) ?? 8} min={0} max={24} onChange={(v) => prop('gap', v)} />
+                    </Row>
                     <Row>
                         <Label>Hover effect</Label>
                         <select

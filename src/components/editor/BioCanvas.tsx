@@ -151,9 +151,10 @@ function DiscordProfileDisplay({
           if (custom?.state) customStatus = custom.state
         }
         const gameActivity = activities?.find((a) => a.type === 0)
+        const activity = gameActivity?.name ? { name: gameActivity.name, state: gameActivity.state, application_id: gameActivity.application_id, assets: gameActivity.assets } : undefined
         const spotify = d.listening_to_spotify && d.spotify ? d.spotify as { album_art_url: string; song: string; artist: string; album: string } : undefined
         const avatarDecoration = (d.discord_user as { avatar_decoration_data?: { asset?: string } })?.avatar_decoration_data?.asset
-        setLanyard({ status, customStatus, activity: gameActivity, spotify, avatarDecoration })
+        setLanyard({ status, customStatus, activity, spotify, avatarDecoration })
       })
       .catch(() => {})
     return () => ac.abort()
@@ -962,7 +963,7 @@ function TiltContainer({ children, intensity = 10, style: outerStyle }: { childr
   }, [])
   const transform = tilt.rx === 0 && tilt.ry === 0
     ? 'translate3d(0,0,0)'
-    : `perspective(1000px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) translate3d(0,0,0)`
+    : `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) translateZ(0)`
   return (
     <div
       ref={ref}
@@ -972,6 +973,9 @@ function TiltContainer({ children, intensity = 10, style: outerStyle }: { childr
         width: '100%',
         height: '100%',
         perspective: 1000,
+        transformStyle: 'preserve-3d',
+        overflow: 'hidden',
+        borderRadius: 'inherit',
         ...outerStyle,
       }}
     >
@@ -980,9 +984,10 @@ function TiltContainer({ children, intensity = 10, style: outerStyle }: { childr
           width: '100%',
           height: '100%',
           transform,
-          transition: tilt.rx === 0 && tilt.ry === 0 ? 'transform 0.2s ease-out' : 'transform 0.1s ease-out',
+          transition: tilt.rx === 0 && tilt.ry === 0 ? 'none' : 'transform 0.15s ease-out',
           transformStyle: 'preserve-3d',
           backfaceVisibility: 'hidden',
+          WebkitBackfaceVisibility: 'hidden',
         }}
       >
         {children}
@@ -1345,7 +1350,9 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
         backdropFilter: bf || undefined,
         WebkitBackdropFilter: bf || undefined,
         opacity: (el.props.opacity as number) ?? 1,
-        ...(bf ? { isolation: 'isolate' as const, transform: 'translateZ(0)' } : {}),
+        // Skip isolation/translateZ when inside tilt — they create a separate layer that ghosts
+        ...(bf && !mouseTilt ? { isolation: 'isolate' as const, transform: 'translateZ(0)' } : {}),
+        ...(mouseTilt ? { backfaceVisibility: 'hidden' as const, WebkitBackfaceVisibility: 'hidden' as const } : {}),
       }
       const inner = <div style={innerStyle} />
       return !isEditMode && mouseTilt ? (
@@ -1862,6 +1869,8 @@ function StaticNode({
       : <StaticContainerWithPinned container={el} pinned={pinned} />
   }
 
+  const isTiltDiv = isContainerWithTilt && pinned.length === 0
+  const borderRadius = (el.props?.borderRadius as string) ?? '0'
   return (
     <div
       data-element-id={el.id}
@@ -1875,6 +1884,7 @@ function StaticNode({
         transform: el.rotation ? `rotate(${el.rotation}deg)` : undefined,
         zIndex: el.zIndex,
         opacity: (el.props.opacity as number) ?? 1,
+        ...(isTiltDiv ? { overflow: 'hidden' as const, borderRadius } : {}),
         ...(pointerEventsOnRoot ? { pointerEvents: pointerEventsOnRoot } : {}),
       }}
     >
@@ -1973,7 +1983,7 @@ function StaticContainerWithTiltAndPinned({ container, pinned }: { container: Pa
     backdropFilter: bf || undefined,
     WebkitBackdropFilter: bf || undefined,
     opacity: (props.opacity as number) ?? 1,
-    ...(bf ? { isolation: 'isolate' as const, transform: 'translateZ(0)' } : {}),
+    // Skip isolation/translateZ in tilt context — creates separate layer that ghosts
   }
   const intensity = (props.tiltIntensity as number) ?? 12
   const borderRadius = (props.borderRadius as string) ?? '0'
@@ -1987,8 +1997,6 @@ function StaticContainerWithTiltAndPinned({ container, pinned }: { container: Pa
         width: container.width,
         height: container.height,
         zIndex: container.zIndex ?? 1,
-        isolation: 'isolate',
-        transform: 'translateZ(0)',
         overflow: 'hidden',
         borderRadius,
       }}
