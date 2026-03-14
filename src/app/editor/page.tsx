@@ -218,20 +218,6 @@ export default function EditorPage() {
     setSelectedId(el.id)
   }, [setEffectiveLayout])
 
-  const handleAddBlock = useCallback((elements: Array<Omit<PageElement, 'id'>>) => {
-    const baseId = `el-${Date.now()}`
-    const containerId = elements.find((e) => e.type === 'div') ? `${baseId}-0` : undefined
-    const withIds: PageElement[] = elements.map((template, i) => {
-      const id = `${baseId}-${i}`
-      const pinnedTo = template.pinnedTo === '__CONTAINER__' ? containerId : template.pinnedTo
-      return { ...template, id, pinnedTo } as PageElement
-    })
-    const maxZ = effectiveLayout.elements.reduce((m, e) => Math.max(m, e.zIndex), 0)
-    const adjusted = withIds.map((e, i) => ({ ...e, zIndex: maxZ + i + 1 }))
-    setEffectiveLayout((prev) => ({ ...prev, elements: [...prev.elements, ...adjusted] }))
-    setSelectedId(adjusted[0]?.id ?? null)
-  }, [setEffectiveLayout, effectiveLayout.elements])
-
   const handleUpdateElement = useCallback((id: string, updates: Partial<PageElement>) => {
     setEffectiveLayout((prev) => ({
       ...prev,
@@ -441,7 +427,6 @@ export default function EditorPage() {
         <EditorSidebar
           elements={effectiveLayout.elements}
           onAddElement={handleAddElement}
-          onAddBlock={handleAddBlock}
           selectedId={selectedId}
           onSelect={setSelectedId}
           onUpdateElement={handleUpdateElement}

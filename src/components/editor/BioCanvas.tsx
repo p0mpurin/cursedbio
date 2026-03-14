@@ -461,6 +461,7 @@ function BadgesDisplay({ el, isEditMode }: { el: PageElement; isEditMode: boolea
   const gap = (el.props.gap as number) ?? 8
   const hoverEffect = (el.props.hoverEffect as string) ?? 'lift'
   const opacity = (el.props.opacity as number) ?? 1
+  const hiddenBadgeIds = new Set((el.props.hiddenBadgeIds as string[]) ?? [])
 
   const [platformBadges, setPlatformBadges] = useState<Array<{ id: string; src: string; tooltip: string }>>([])
 
@@ -471,7 +472,7 @@ function BadgesDisplay({ el, isEditMode }: { el: PageElement; isEditMode: boolea
       .catch(() => setPlatformBadges([]))
   }, [])
 
-  const badges = platformBadges
+  const badges = platformBadges.filter((badge) => !hiddenBadgeIds.has(badge.id))
   if (badges.length === 0) {
     return (
       <div

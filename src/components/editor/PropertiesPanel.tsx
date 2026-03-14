@@ -7,6 +7,7 @@
 import { useRef, useState } from 'react'
 import type { PageElement, PageLayout } from '@/lib/db'
 import { CONTAINER_PRESETS, BUTTON_PRESETS, TYPOGRAPHY_PRESETS, ANIMATION_SNIPPETS, addFavorite, STYLE_PROPS_BY_TYPE } from '@/lib/editor/presets'
+import { PLATFORM_BADGE_DEFS } from '@/lib/platform-badges'
 
 function CollapsibleSection({ title, children, defaultOpen = false, defaultCollapsed }: { title: string; children: React.ReactNode; defaultOpen?: boolean; defaultCollapsed?: boolean }) {
     const [open, setOpen] = useState(defaultCollapsed !== undefined ? !defaultCollapsed : defaultOpen)
@@ -1159,6 +1160,34 @@ export default function PropertiesPanel({
                         Loyalty badges are awarded by CursedBio and shown read-only from your account.
                         Earned badges are managed in your dashboard.
                     </p>
+                    <Row>
+                        <Label>Visible badges</Label>
+                        <div className="space-y-1.5 rounded-md border border-white/10 bg-black/20 p-2 max-h-40 overflow-y-auto">
+                            {Object.values(PLATFORM_BADGE_DEFS).map((badge) => {
+                                const hidden = new Set((element.props.hiddenBadgeIds as string[]) ?? [])
+                                const checked = !hidden.has(badge.id)
+                                return (
+                                    <label key={badge.id} className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={checked}
+                                            onChange={(e) => {
+                                                const current = new Set((element.props.hiddenBadgeIds as string[]) ?? [])
+                                                if (e.target.checked) current.delete(badge.id)
+                                                else current.add(badge.id)
+                                                prop('hiddenBadgeIds', Array.from(current))
+                                            }}
+                                            className="accent-[var(--messmer-copper)]"
+                                        />
+                                        <span className="text-sm text-[var(--messmer-ivory)]">{badge.tooltip}</span>
+                                    </label>
+                                )
+                            })}
+                        </div>
+                        <p className="text-[10px] text-[var(--text-muted)] mt-1">
+                            Only affects badges you have earned.
+                        </p>
+                    </Row>
                     <Row>
                         <Label>Size</Label>
                         <StepperField value={(element.props.size as number) ?? 28} min={16} max={64} onChange={(v) => prop('size', v)} step={4} />
