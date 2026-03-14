@@ -455,27 +455,23 @@ function SpotifyNowPlayingDisplay({ el, isEditMode }: { el: PageElement; isEditM
   )
 }
 
-/** Badge strip — displays custom badges or platform badges in a row */
+/** Badge strip — displays awarded platform loyalty badges in a row */
 function BadgesDisplay({ el, isEditMode }: { el: PageElement; isEditMode: boolean }) {
-  const badgesProp = (el.props.badges as Array<{ id: string; src: string; tooltip?: string; href?: string }>) ?? []
-  const source = (el.props.source as string) ?? 'custom'
   const size = (el.props.size as number) ?? 28
   const gap = (el.props.gap as number) ?? 8
   const hoverEffect = (el.props.hoverEffect as string) ?? 'lift'
   const opacity = (el.props.opacity as number) ?? 1
 
   const [platformBadges, setPlatformBadges] = useState<Array<{ id: string; src: string; tooltip: string }>>([])
-  const usePlatform = source === 'platform'
 
   useEffect(() => {
-    if (!usePlatform) return
     fetch('/api/platform-badges')
       .then((r) => r.json())
       .then((d) => setPlatformBadges(d.badges ?? []))
       .catch(() => setPlatformBadges([]))
-  }, [usePlatform])
+  }, [])
 
-  const badges = usePlatform ? platformBadges : badgesProp
+  const badges = platformBadges
   if (badges.length === 0) {
     return (
       <div
@@ -493,17 +489,11 @@ function BadgesDisplay({ el, isEditMode }: { el: PageElement; isEditMode: boolea
         }}
       >
         <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
-          {usePlatform ? 'No platform badges' : 'Add badges in props'}
+          No loyalty badges earned yet
         </span>
       </div>
     )
   }
-
-  const hoverStyle: React.CSSProperties =
-    hoverEffect === 'lift' ? { transition: 'transform 0.2s ease' } as React.CSSProperties & { ':hover'?: object }
-    : hoverEffect === 'scale' ? { transition: 'transform 0.2s ease' } as React.CSSProperties & { ':hover'?: object }
-    : hoverEffect === 'glow' ? { transition: 'filter 0.2s ease' } as React.CSSProperties & { ':hover'?: object }
-    : {}
 
   return (
     <div

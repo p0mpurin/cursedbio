@@ -1155,32 +1155,10 @@ export default function PropertiesPanel({
             {/* Badges */}
             {element.type === 'badges' && (
                 <Section title="Badges">
-                    <p className="text-[10px] text-[var(--text-muted)] mb-2">Custom badges in a row, or use <code className="bg-white/10 px-1 rounded">source: platform</code> to show CursedBio platform badges (verified, early user, premium, staff) from your account.</p>
-                    <Row>
-                        <Label>Source</Label>
-                        <select
-                            value={(element.props.source as string) ?? 'custom'}
-                            onChange={(e) => prop('source', e.target.value)}
-                            className="w-full px-2 py-1.5 rounded bg-black/30 border border-white/15 text-sm text-[var(--messmer-ivory)]"
-                        >
-                            <option value="custom">Custom (define badges below)</option>
-                            <option value="platform">Platform (from account)</option>
-                        </select>
-                    </Row>
-                    {(element.props.source as string) !== 'platform' && (
-                        <>
-                            <Row>
-                                <Label>Badges (JSON)</Label>
-                                <p className="text-[10px] text-[var(--text-muted)]">Array of {`{ id, src, tooltip?, href? }`}</p>
-                            </Row>
-                            <Inp
-                                value={JSON.stringify((element.props.badges as unknown[]) ?? [], null, 2)}
-                                onChange={(v) => { try { prop('badges', JSON.parse(v || '[]')) } catch {} }}
-                                placeholder='[{"id":"verified","src":"...","tooltip":"Verified"}]'
-                                className="font-mono text-xs min-h-[80px]"
-                            />
-                        </>
-                    )}
+                    <p className="text-[10px] text-[var(--text-muted)] mb-2">
+                        Loyalty badges are awarded by CursedBio and shown read-only from your account.
+                        Earned badges are managed in your dashboard.
+                    </p>
                     <Row>
                         <Label>Size</Label>
                         <StepperField value={(element.props.size as number) ?? 28} min={16} max={64} onChange={(v) => prop('size', v)} step={4} />

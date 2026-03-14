@@ -12,7 +12,6 @@ import EditorSidebar from '@/components/editor/EditorSidebar'
 import PropertiesPanel from '@/components/editor/PropertiesPanel'
 import PageSettingsPanel from '@/components/editor/PageSettingsPanel'
 import { getEditableLayout, isResponsiveLayout, updateLayoutWithCascade } from '@/lib/responsive-layout'
-import { getTemplate } from '@/lib/editor/templates'
 import type { PageElement, PageLayout, ResponsivePageLayout } from '@/lib/db'
 
 /** Default: desktop-sized canvas with a single container. Users add elements inside it. */
@@ -77,13 +76,6 @@ export default function EditorPage() {
 
   const getInitialLayout = useCallback((): PageLayout | ResponsivePageLayout => {
     if (typeof window !== 'undefined') {
-      // ?template= takes priority for TemplateGallery links
-      const params = new URLSearchParams(window.location.search)
-      const templateId = params.get('template')
-      if (templateId) {
-        const t = getTemplate(templateId)
-        if (t) return t
-      }
       const raw = localStorage.getItem('cursedbio-editor-layout')
       if (raw) {
         try {
@@ -108,15 +100,8 @@ export default function EditorPage() {
   const [historyVersion, setHistoryVersion] = useState(0)
 
   // Load saved layout from API (persists across dev restarts)
-  // Skip overwrite when coming from template apply (?from=template) so user sees their applied template
   useEffect(() => {
     if (!isLoaded) return
-    const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
-    const fromTemplate = params?.get('from') === 'template'
-    if (fromTemplate) {
-      setLayoutLoaded(true)
-      return
-    }
     let cancelled = false
     fetch('/api/pages')
       .then((r) => r.json())

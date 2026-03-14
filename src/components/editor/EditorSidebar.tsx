@@ -148,15 +148,13 @@ const MORE_ELEMENTS: Array<{ label: string; icon: string; template: Omit<PageEle
     }
   },
   {
-    label: 'Badges',
+    label: 'Loyalty Badges',
     icon: '◎',
     template: {
       type: 'badges',
-      name: 'Badges',
+      name: 'Loyalty Badges',
       x: 100, y: 100, width: 200, height: 40, zIndex: 10,
       props: {
-        badges: [],
-        source: 'custom',
         size: 28,
         gap: 8,
         hoverEffect: 'lift',

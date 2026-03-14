@@ -10,11 +10,8 @@ import { DEV_AUTH_COOKIE } from '@/lib/dev-auth'
 import { supabaseAdmin } from '@/lib/db'
 import ProfileInfoCard from '@/components/dashboard/ProfileInfoCard'
 import DiscordConnectSection from '@/components/dashboard/DiscordConnectSection'
-import SimpleLayoutsSection from '@/components/dashboard/SimpleLayoutsSection'
-import ThemeTemplatesSection from '@/components/dashboard/ThemeTemplatesSection'
-import TemplateGallery from '@/components/dashboard/TemplateGallery'
 import UrlClaimSection from '@/components/dashboard/UrlClaimSection'
-import { TEMPLATES } from '@/lib/editor/templates'
+import { getAwardedPlatformBadges, PLATFORM_BADGE_DEFS } from '@/lib/platform-badges'
 
 export default async function DashboardPage() {
   unstable_noStore() // Ensure fresh user data (e.g. after Discord disconnect)
@@ -47,6 +44,8 @@ export default async function DashboardPage() {
     avatar_url?: string
   } | null
   const discordConnected = !!discord?.username
+  const awardedBadges = getAwardedPlatformBadges(user?.publicMetadata?.platformBadges)
+  const totalBadgeCount = Object.keys(PLATFORM_BADGE_DEFS).length
 
   return (
     <div className="min-h-[calc(100vh-4rem)] landing-bg">
@@ -54,7 +53,7 @@ export default async function DashboardPage() {
         {/* Hero */}
         <section className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-2">
-            Your Bio Page
+            Dashboard
           </h1>
           <p className="text-[var(--text-muted)] mb-6">
             Your page:{' '}
@@ -75,27 +74,16 @@ export default async function DashboardPage() {
             >
               Preview
             </Link>
+            <Link
+              href="/help"
+              className="px-6 py-3 rounded-xl border border-[var(--accent-blue)]/35 text-[var(--accent-blue-soft)] hover:bg-[var(--accent-blue)]/10 font-medium transition active:scale-[0.98]"
+            >
+              How to use
+            </Link>
           </div>
           <p className="text-xs text-[var(--text-muted)] mt-3">
-            Open the editor and click Preview to see your page live
+            Set up your profile here, then build your page in the editor
           </p>
-        </section>
-
-        {/* Theme templates - pick template, fill settings, apply */}
-        <ThemeTemplatesSection defaultUsername={username} defaultDisplayName={displayName} />
-
-        {/* Simple layouts - pick one and fill in your info */}
-        <section className="mb-12">
-          <SimpleLayoutsSection defaultUsername={username} defaultDisplayName={displayName} />
-        </section>
-
-        {/* Quick templates - one-click to open editor with template */}
-        <section className="mb-12">
-          <h2 className="text-sm font-semibold text-[var(--accent-blue-soft)] uppercase tracking-wider mb-3">Quick templates</h2>
-          <p className="text-sm text-[var(--text-muted)] mb-4">
-            Start from a template and customize in the editor.
-          </p>
-          <TemplateGallery templates={TEMPLATES} />
         </section>
 
         {/* Your Info - editable profile data for the editor */}
@@ -103,11 +91,47 @@ export default async function DashboardPage() {
           <ProfileInfoCard defaultUsername={username} defaultDisplayName={displayName} />
         </section>
 
+        {/* Loyalty badges - awarded only */}
+        <section className="mb-12 p-6 rounded-2xl bg-white/[0.03] border border-white/10">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--accent-blue-soft)] uppercase tracking-wider mb-2">Loyalty badges</h2>
+              <p className="text-sm text-[var(--text-muted)]">
+                Badges are awarded by CursedBio. They are not custom or user-created.
+              </p>
+            </div>
+            <div className="px-3 py-1.5 rounded-lg border border-white/10 bg-black/20 text-xs text-[var(--text-muted)]">
+              {awardedBadges.length}/{totalBadgeCount} earned
+            </div>
+          </div>
+
+          {awardedBadges.length > 0 ? (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {awardedBadges.map((badge) => (
+                <div key={badge.id} className="p-3 rounded-xl bg-black/30 border border-white/10 flex items-center gap-3">
+                  <img src={badge.src} alt={badge.tooltip} className="w-8 h-8 object-contain shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm text-[var(--text-primary)] font-medium">{badge.tooltip}</p>
+                    <p className="text-xs text-[var(--text-muted)]">{badge.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-4 rounded-xl bg-black/25 border border-white/10 text-sm text-[var(--text-muted)]">
+              No loyalty badges yet. Keep using CursedBio and supporting the platform to unlock them.
+            </div>
+          )}
+        </section>
+
         {/* Discord connection - for Discord Profile element */}
         <section className="mb-12 p-6 rounded-2xl bg-white/[0.03] border border-white/10">
           <h2 className="text-sm font-semibold text-[var(--accent-blue-soft)] uppercase tracking-wider mb-3">Discord</h2>
           <p className="text-sm text-[var(--text-muted)] mb-4">
-            Link your Discord to display your avatar, username, and badges on your bio page with the Discord Profile element.
+            Link your Discord to display your avatar, username, and activity with the Discord Profile element.
+          </p>
+          <p className="text-xs text-[var(--text-muted)] mb-4">
+            Status: {discordConnected ? 'Connected' : 'Not connected'}
           </p>
           <DiscordConnectSection
             discord={(user?.publicMetadata?.discord ?? null) as { username?: string; global_name?: string; avatar_url?: string } | null}
@@ -132,13 +156,18 @@ export default async function DashboardPage() {
             </div>
           </div>
           <div className="pt-4 border-t border-white/5">
-            <p className="text-sm text-[var(--text-muted)] mb-4">Add text, images, and links in the editor. Your info above will appear when you add text elements.</p>
+            <p className="text-sm text-[var(--text-muted)] mb-4">
+              Build your bio from scratch in the editor. Need a walkthrough? Use the help guide.
+            </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/editor" className="px-4 py-2 rounded-lg bg-[var(--accent-blue)]/15 hover:bg-[var(--accent-blue)]/25 border border-[var(--accent-blue)]/30 text-sm font-medium transition">
                 Open editor
               </Link>
               <Link href="/preview" className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 text-sm transition">
                 Preview page
+              </Link>
+              <Link href="/help" className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/15 text-sm transition">
+                How to use
               </Link>
             </div>
           </div>

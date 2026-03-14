@@ -31,6 +31,9 @@ export default function NavBar({ devAuth, isDev }: NavBarProps) {
               <Link href="/editor" className="text-sm hover:text-[var(--accent-blue-soft)] transition text-[var(--text-primary)]">
                 Edit Bio
               </Link>
+              <Link href="/help" className="text-sm hover:text-[var(--accent-blue-soft)] transition text-[var(--text-primary)]">
+                How to use
+              </Link>
               {devAuth && isDev ? (
                 <Link
                   href="/api/dev-logout"
@@ -57,6 +60,9 @@ export default function NavBar({ devAuth, isDev }: NavBarProps) {
                   Sign In
                 </button>
               </SignInButton>
+              <Link href="/help" className="text-sm hover:text-[var(--accent-blue-soft)] transition text-[var(--text-primary)]">
+                How to use
+              </Link>
               <SignUpButton mode="modal">
                 <button className="px-4 py-2 rounded-lg bg-[var(--accent-blue)]/25 hover:bg-[var(--accent-blue)]/35 border border-[var(--accent-blue)]/40 text-[var(--text-primary)] transition text-sm">
                   Sign Up

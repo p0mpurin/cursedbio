@@ -6,7 +6,7 @@
 import { usePathname } from 'next/navigation'
 import NavBar from './NavBar'
 
-const SHOW_NAV_PATHS = ['/', '/dashboard', '/editor', '/profile']
+const SHOW_NAV_PATHS = ['/', '/dashboard', '/editor', '/profile', '/help']
 
 type Props = { devAuth?: boolean; isDev?: boolean }
 
