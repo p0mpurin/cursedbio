@@ -157,6 +157,10 @@ const MORE_ELEMENTS: Array<{ label: string; icon: string; template: Omit<PageEle
       props: {
         size: 28,
         gap: 8,
+        badgeColor: '#ffffff',
+        alwaysGlow: false,
+        glowColor: 'rgba(255,255,255,0.65)',
+        glowBlur: 8,
         hoverEffect: 'lift',
       }
     }

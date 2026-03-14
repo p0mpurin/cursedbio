@@ -1196,6 +1196,32 @@ export default function PropertiesPanel({
                         <Label>Gap</Label>
                         <StepperField value={(element.props.gap as number) ?? 8} min={0} max={24} onChange={(v) => prop('gap', v)} />
                     </Row>
+                    <AlphaColorRow
+                        label="Badge color"
+                        value={(element.props.badgeColor as string) ?? '#ffffff'}
+                        onChange={(v) => prop('badgeColor', v)}
+                    />
+                    <Row>
+                        <Label>Always glow</Label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={(element.props.alwaysGlow as boolean) === true}
+                                onChange={(e) => prop('alwaysGlow', e.target.checked)}
+                                className="accent-[var(--messmer-copper)]"
+                            />
+                            <span className="text-sm text-[var(--messmer-ivory)]">Keep glow visible all the time</span>
+                        </label>
+                    </Row>
+                    <AlphaColorRow
+                        label="Glow color"
+                        value={(element.props.glowColor as string) ?? 'rgba(255,255,255,0.65)'}
+                        onChange={(v) => prop('glowColor', v)}
+                    />
+                    <Row>
+                        <Label>Glow blur</Label>
+                        <StepperField value={(element.props.glowBlur as number) ?? 8} min={0} max={40} onChange={(v) => prop('glowBlur', v)} />
+                    </Row>
                     <Row>
                         <Label>Hover effect</Label>
                         <select
@@ -1477,10 +1503,23 @@ export default function PropertiesPanel({
                         </div>
                     </Row>
                     {(element.props.mouseTilt as boolean) && (
-                        <Row>
-                            <Label>Tilt intensity</Label>
-                            <StepperField value={(element.props.tiltIntensity as number) ?? 12} min={2} max={30} onChange={(v) => prop('tiltIntensity', v)} />
-                        </Row>
+                        <>
+                            <Row>
+                                <Label>Tilt intensity</Label>
+                                <StepperField value={(element.props.tiltIntensity as number) ?? 12} min={2} max={30} onChange={(v) => prop('tiltIntensity', v)} />
+                            </Row>
+                            <Row>
+                                <Label>Tilt link group (optional)</Label>
+                                <Inp
+                                    value={(element.props.tiltLinkGroup as string) ?? ''}
+                                    placeholder="e.g. hero-cards"
+                                    onChange={(v) => prop('tiltLinkGroup', v.trim() || undefined)}
+                                />
+                                <p className="text-[10px] text-[var(--text-muted)] mt-1">
+                                    Containers with the same group ID tilt together.
+                                </p>
+                            </Row>
+                        </>
                     )}
                     <AlphaColorRow key={`div-bg-${element.id}-${String(element.props.backgroundColor ?? '')}`} label="Background" value={(element.props.backgroundColor as string) ?? 'rgba(255,255,255,0.05)'} onChange={(v) => prop('backgroundColor', v)} />
                     <Row>

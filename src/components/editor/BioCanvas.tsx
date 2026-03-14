@@ -461,6 +461,10 @@ function BadgesDisplay({ el, isEditMode }: { el: PageElement; isEditMode: boolea
   const gap = (el.props.gap as number) ?? 8
   const hoverEffect = (el.props.hoverEffect as string) ?? 'lift'
   const opacity = (el.props.opacity as number) ?? 1
+  const badgeColor = (el.props.badgeColor as string) ?? '#ffffff'
+  const alwaysGlow = (el.props.alwaysGlow as boolean) === true
+  const glowColor = (el.props.glowColor as string) ?? 'rgba(255,255,255,0.65)'
+  const glowBlur = (el.props.glowBlur as number) ?? 8
   const hiddenBadgeIds = new Set((el.props.hiddenBadgeIds as string[]) ?? [])
 
   const [platformBadges, setPlatformBadges] = useState<Array<{ id: string; src: string; tooltip: string; color?: string }>>([])
@@ -511,28 +515,39 @@ function BadgesDisplay({ el, isEditMode }: { el: PageElement; isEditMode: boolea
       {badges.map((b) => {
         const href = 'href' in b ? (b as { href?: string }).href : undefined
         const tooltip = b.tooltip ?? b.id
+        const baseFilter = alwaysGlow ? `drop-shadow(0 0 ${Math.max(0, glowBlur)}px ${glowColor})` : ''
+        const commonStyle: React.CSSProperties = {
+          width: size,
+          height: size,
+          flexShrink: 0,
+          ...(hoverEffect === 'lift' && !isEditMode ? { transition: 'transform 0.2s ease' } : {}),
+          ...(hoverEffect === 'glow' && !isEditMode ? { transition: 'filter 0.2s ease' } : {}),
+          ...(baseFilter ? { filter: baseFilter } : {}),
+        }
         const imgEl = (
-          <img
-            src={b.src}
-            alt=""
+          <div
             title={tooltip}
             style={{
-              width: size,
-              height: size,
-              objectFit: 'contain',
-              flexShrink: 0,
-              ...(hoverEffect === 'lift' && !isEditMode ? { transition: 'transform 0.2s ease' } : {}),
-              ...(hoverEffect === 'glow' && !isEditMode ? { transition: 'filter 0.2s ease' } : {}),
+              ...commonStyle,
+              backgroundColor: badgeColor,
+              maskImage: `url(${b.src})`,
+              maskRepeat: 'no-repeat',
+              maskPosition: 'center',
+              maskSize: 'contain',
+              WebkitMaskImage: `url(${b.src})`,
+              WebkitMaskRepeat: 'no-repeat',
+              WebkitMaskPosition: 'center',
+              WebkitMaskSize: 'contain',
             }}
             onMouseEnter={(e) => {
               if (isEditMode) return
               if (hoverEffect === 'lift') e.currentTarget.style.transform = 'translateY(-4px)'
               if (hoverEffect === 'scale') e.currentTarget.style.transform = 'scale(1.15)'
-              if (hoverEffect === 'glow') e.currentTarget.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.6))'
+              if (hoverEffect === 'glow') e.currentTarget.style.filter = `drop-shadow(0 0 ${Math.max(8, glowBlur)}px ${glowColor})`
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = ''
-              e.currentTarget.style.filter = ''
+              e.currentTarget.style.filter = baseFilter
             }}
           />
         )
@@ -919,9 +934,23 @@ function buildSnapTargets(
   return { xs: outXs, ys: outYs }
 }
 
-/** 3D tilt - freezes over interactive elements so clicks work. Uses double-buffering for stability. */
+/** 3D tilt with directional hover zones; freezes over interactive elements so clicks work. */
 const INTERACTIVE = 'a, button, [role="button"]'
-function TiltContainer({ children, intensity = 10, style: outerStyle }: { children: React.ReactNode; intensity?: number; style?: React.CSSProperties }) {
+function TiltContainer({
+  children,
+  intensity = 10,
+  style: outerStyle,
+  linkedTilt,
+  onTiltChange,
+  onTiltLeave,
+}: {
+  children: React.ReactNode
+  intensity?: number
+  style?: React.CSSProperties
+  linkedTilt?: { rx: number; ry: number } | null
+  onTiltChange?: (tilt: { rx: number; ry: number }) => void
+  onTiltLeave?: () => void
+}) {
   const ref = useRef<HTMLDivElement>(null)
   const [tilt, setTilt] = useState({ rx: 0, ry: 0 })
   const overInteractive = useRef(false)
@@ -932,7 +961,8 @@ function TiltContainer({ children, intensity = 10, style: outerStyle }: { childr
     if (interactive) {
       if (!overInteractive.current) {
         overInteractive.current = true
-        setTilt({ rx: 0, ry: 0 })
+        if (onTiltChange) onTiltChange({ rx: 0, ry: 0 })
+        else setTilt({ rx: 0, ry: 0 })
       }
       return
     }
@@ -942,19 +972,27 @@ function TiltContainer({ children, intensity = 10, style: outerStyle }: { childr
     const rect = el.getBoundingClientRect()
     const nx = (e.clientX - rect.left) / rect.width - 0.5
     const ny = (e.clientY - rect.top) / rect.height - 0.5
-    const ry = nx * intensity
-    const rx = -ny * intensity
+    const zoneX = nx < -0.2 ? -1 : nx > 0.2 ? 1 : 0
+    const zoneY = ny < -0.2 ? -1 : ny > 0.2 ? 1 : 0
+    const ry = zoneX * intensity
+    const rx = -zoneY * intensity
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    rafRef.current = requestAnimationFrame(() => setTilt({ rx, ry }))
-  }, [intensity])
+    rafRef.current = requestAnimationFrame(() => {
+      if (onTiltChange) onTiltChange({ rx, ry })
+      else setTilt({ rx, ry })
+    })
+  }, [intensity, onTiltChange])
   const onMouseLeave = useCallback(() => {
     overInteractive.current = false
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    setTilt({ rx: 0, ry: 0 })
-  }, [])
-  const transform = tilt.rx === 0 && tilt.ry === 0
+    if (onTiltLeave) onTiltLeave()
+    if (onTiltChange) onTiltChange({ rx: 0, ry: 0 })
+    else setTilt({ rx: 0, ry: 0 })
+  }, [onTiltChange, onTiltLeave])
+  const effectiveTilt = linkedTilt ?? tilt
+  const transform = effectiveTilt.rx === 0 && effectiveTilt.ry === 0
     ? 'translate3d(0,0,0)'
-    : `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) translateZ(0)`
+    : `rotateX(${effectiveTilt.rx}deg) rotateY(${effectiveTilt.ry}deg) translateZ(0)`
   return (
     <div
       ref={ref}
@@ -1324,8 +1362,6 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
     case 'div': {
       const bf = (el.props.backdropFilter as string) ?? ''
       const bg = (el.props.backgroundColor as string) ?? 'transparent'
-      const mouseTilt = !!(el.props.mouseTilt as boolean)
-      const tiltIntensity = (el.props.tiltIntensity as number) ?? 12
       const noExplicitBg = !bg || bg === 'transparent' || bg === 'rgba(0,0,0,0)'
       const effectiveBg = bf && noExplicitBg ? 'rgba(255,255,255,0.08)' : bg
       const innerStyle: React.CSSProperties = {
@@ -1341,16 +1377,9 @@ function ElementContent({ el, isEditMode }: { el: PageElement; isEditMode: boole
         backdropFilter: bf || undefined,
         WebkitBackdropFilter: bf || undefined,
         opacity: (el.props.opacity as number) ?? 1,
-        // Skip isolation/translateZ when inside tilt — they create a separate layer that ghosts
-        ...(bf && !mouseTilt ? { isolation: 'isolate' as const, transform: 'translateZ(0)' } : {}),
-        ...(mouseTilt ? { backfaceVisibility: 'hidden' as const, WebkitBackfaceVisibility: 'hidden' as const } : {}),
+        ...(bf ? { isolation: 'isolate' as const, transform: 'translateZ(0)' } : {}),
       }
-      const inner = <div style={innerStyle} />
-      return !isEditMode && mouseTilt ? (
-        <TiltContainer intensity={tiltIntensity}>{inner}</TiltContainer>
-      ) : (
-        inner
-      )
+      return <div style={innerStyle} />
     }
     case 'video': {
       const radius = (el.props.borderRadius as string) ?? '0'
@@ -1844,10 +1873,16 @@ function StaticNode({
   el,
   layout,
   pointerEventsOnRoot,
+  linkedTilt,
+  onLinkedTiltChange,
+  onLinkedTiltReset,
 }: {
   el: PageElement
   layout?: PageLayout
   pointerEventsOnRoot?: 'auto' | 'none'
+  linkedTilt?: { rx: number; ry: number } | null
+  onLinkedTiltChange?: (groupId: string, tilt: { rx: number; ry: number }) => void
+  onLinkedTiltReset?: (groupId: string) => void
 }) {
   if (el.visible === false) return null
   const isContainer = el.type === 'div'
@@ -1856,7 +1891,7 @@ function StaticNode({
 
   if (isContainer && pinned.length > 0) {
     return isContainerWithTilt
-      ? <StaticContainerWithTiltAndPinned container={el} pinned={pinned} />
+      ? <StaticContainerWithTiltAndPinned container={el} pinned={pinned} linkedTilt={linkedTilt} onLinkedTiltChange={onLinkedTiltChange} onLinkedTiltReset={onLinkedTiltReset} />
       : <StaticContainerWithPinned container={el} pinned={pinned} />
   }
 
@@ -1879,7 +1914,24 @@ function StaticNode({
         ...(pointerEventsOnRoot ? { pointerEvents: pointerEventsOnRoot } : {}),
       }}
     >
-      <ElementContent el={el} isEditMode={false} />
+      {isTiltDiv ? (
+        <TiltContainer
+          intensity={(el.props.tiltIntensity as number) ?? 12}
+          linkedTilt={linkedTilt}
+          onTiltChange={(tilt) => {
+            const groupId = (el.props.tiltLinkGroup as string | undefined)?.trim()
+            if (groupId && onLinkedTiltChange) onLinkedTiltChange(groupId, tilt)
+          }}
+          onTiltLeave={() => {
+            const groupId = (el.props.tiltLinkGroup as string | undefined)?.trim()
+            if (groupId && onLinkedTiltReset) onLinkedTiltReset(groupId)
+          }}
+        >
+          <ElementContent el={el} isEditMode={false} />
+        </TiltContainer>
+      ) : (
+        <ElementContent el={el} isEditMode={false} />
+      )}
     </div>
   )
 }
@@ -1952,7 +2004,19 @@ function StaticContainerWithPinned({ container, pinned }: { container: PageEleme
 }
 
 /** Tilt applies to entire container; pinned items tilt with it. translateZ on children helps hit-testing. */
-function StaticContainerWithTiltAndPinned({ container, pinned }: { container: PageElement; pinned: PageElement[] }) {
+function StaticContainerWithTiltAndPinned({
+  container,
+  pinned,
+  linkedTilt,
+  onLinkedTiltChange,
+  onLinkedTiltReset,
+}: {
+  container: PageElement
+  pinned: PageElement[]
+  linkedTilt?: { rx: number; ry: number } | null
+  onLinkedTiltChange?: (groupId: string, tilt: { rx: number; ry: number }) => void
+  onLinkedTiltReset?: (groupId: string) => void
+}) {
   const props = container.props ?? {}
   const bf = (props.backdropFilter as string) ?? ''
   const bg = (props.backgroundColor as string) ?? 'transparent'
@@ -1992,7 +2056,18 @@ function StaticContainerWithTiltAndPinned({ container, pinned }: { container: Pa
         borderRadius,
       }}
     >
-      <TiltContainer intensity={intensity}>
+      <TiltContainer
+        intensity={intensity}
+        linkedTilt={linkedTilt}
+        onTiltChange={(tilt) => {
+          const groupId = (props.tiltLinkGroup as string | undefined)?.trim()
+          if (groupId && onLinkedTiltChange) onLinkedTiltChange(groupId, tilt)
+        }}
+        onTiltLeave={() => {
+          const groupId = (props.tiltLinkGroup as string | undefined)?.trim()
+          if (groupId && onLinkedTiltReset) onLinkedTiltReset(groupId)
+        }}
+      >
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
           {/* data-element-id on inner = single backdrop layer that tilts; avoids ghost from customCss on outer */}
           <div data-element-id={container.id} data-element-type="div" style={innerStyle} />
@@ -2039,6 +2114,7 @@ export default function BioCanvas({
   showGuides?: boolean
 }) {
   const c = layout.canvas
+  const [linkedTilts, setLinkedTilts] = useState<Record<string, { rx: number; ry: number }>>({})
 
   const bgSize = c.backgroundImageSize || 'cover'
   const bgStyle: React.CSSProperties = c.backgroundType === 'gradient'
@@ -2134,7 +2210,21 @@ export default function BioCanvas({
           {layout.elements.map((el) =>
             el.pinnedTo ? null : (
               (el.type === 'div' && layout.elements.some((e) => e.pinnedTo === el.id)) ? (
-                <StaticNode key={el.id} el={el} layout={layout} />
+                <StaticNode
+                  key={el.id}
+                  el={el}
+                  layout={layout}
+                  linkedTilt={(() => {
+                    const gid = (el.props.tiltLinkGroup as string | undefined)?.trim()
+                    return gid ? linkedTilts[gid] ?? null : null
+                  })()}
+                  onLinkedTiltChange={(groupId, tilt) => setLinkedTilts((prev) => ({ ...prev, [groupId]: tilt }))}
+                  onLinkedTiltReset={(groupId) => setLinkedTilts((prev) => {
+                    const next = { ...prev }
+                    delete next[groupId]
+                    return next
+                  })}
+                />
               ) : null
             )
           )}
@@ -2143,7 +2233,22 @@ export default function BioCanvas({
             {layout.elements
               .filter((el) => !el.pinnedTo && !(el.type === 'div' && layout.elements.some((e) => e.pinnedTo === el.id)))
               .map((el) => (
-                <StaticNode key={el.id} el={el} layout={layout} pointerEventsOnRoot="auto" />
+                <StaticNode
+                  key={el.id}
+                  el={el}
+                  layout={layout}
+                  pointerEventsOnRoot="auto"
+                  linkedTilt={(() => {
+                    const gid = (el.props.tiltLinkGroup as string | undefined)?.trim()
+                    return gid ? linkedTilts[gid] ?? null : null
+                  })()}
+                  onLinkedTiltChange={(groupId, tilt) => setLinkedTilts((prev) => ({ ...prev, [groupId]: tilt }))}
+                  onLinkedTiltReset={(groupId) => setLinkedTilts((prev) => {
+                    const next = { ...prev }
+                    delete next[groupId]
+                    return next
+                  })}
+                />
               ))}
           </div>
         </>
