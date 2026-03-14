@@ -1,26 +1,12 @@
-function makeBadgeSvgDataUri(label: string, bg: string, fg = '#ffffff'): string {
-  const safeLabel = label.replace(/[^A-Z0-9]/gi, '').slice(0, 3).toUpperCase() || 'CB'
-  const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="${bg}" stop-opacity="1"/>
-      <stop offset="100%" stop-color="#111111" stop-opacity="1"/>
-    </linearGradient>
-  </defs>
-  <circle cx="32" cy="32" r="30" fill="url(#g)" />
-  <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2" />
-  <text x="32" y="38" text-anchor="middle" font-size="16" font-family="Inter,Arial,sans-serif" font-weight="700" fill="${fg}">${safeLabel}</text>
-</svg>
-`.trim()
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
-}
+const BOOTSTRAP_ICON_CDN = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/icons'
+const icon = (name: string) => `${BOOTSTRAP_ICON_CDN}/${name}.svg`
 
 export type PlatformBadge = {
   id: string
   src: string
   tooltip: string
   description: string
+  color: string
 }
 
 export type AwardedBadge = {
@@ -31,69 +17,80 @@ export type AwardedBadge = {
 export const PLATFORM_BADGE_DEFS: Record<string, PlatformBadge> = {
   verified: {
     id: 'verified',
-    src: makeBadgeSvgDataUri('VER', '#2f8cff'),
+    src: icon('patch-check-fill'),
     tooltip: 'Verified',
     description: 'Given to trusted and verified accounts.',
+    color: '#2f8cff',
   },
   early_user: {
     id: 'early_user',
-    src: makeBadgeSvgDataUri('EAR', '#8f62ff'),
+    src: icon('clock-history'),
     tooltip: 'Early User',
     description: 'Awarded to early CursedBio adopters.',
+    color: '#8f62ff',
   },
   premium: {
     id: 'premium',
-    src: makeBadgeSvgDataUri('PRO', '#ff8a00'),
+    src: icon('gem'),
     tooltip: 'Premium',
     description: 'Awarded to premium supporters.',
+    color: '#ff8a00',
   },
   staff: {
     id: 'staff',
-    src: makeBadgeSvgDataUri('STF', '#ff4d6d'),
+    src: icon('person-badge-fill'),
     tooltip: 'Staff',
     description: 'Awarded to official CursedBio staff.',
+    color: '#ff4d6d',
   },
   founder: {
     id: 'founder',
-    src: makeBadgeSvgDataUri('FND', '#ffd166', '#222222'),
+    src: icon('trophy-fill'),
     tooltip: 'Founder',
     description: 'Reserved for founding contributors and earliest builders.',
+    color: '#ffd166',
   },
   partner: {
     id: 'partner',
-    src: makeBadgeSvgDataUri('PRT', '#00b4d8'),
+    src: icon('people-fill'),
     tooltip: 'Partner',
     description: 'Awarded to official collaborators and partner communities.',
+    color: '#00b4d8',
   },
   creator: {
     id: 'creator',
-    src: makeBadgeSvgDataUri('CRT', '#ff5ca8'),
+    src: icon('stars'),
     tooltip: 'Creator',
     description: 'Awarded to notable creators on the platform.',
+    color: '#ff5ca8',
   },
   developer: {
     id: 'developer',
-    src: makeBadgeSvgDataUri('DEV', '#43d17a'),
+    src: icon('code-slash'),
     tooltip: 'Developer',
     description: 'Awarded to developers helping build or extend CursedBio.',
+    color: '#43d17a',
   },
   supporter: {
     id: 'supporter',
-    src: makeBadgeSvgDataUri('SUP', '#7a7aff'),
+    src: icon('heart-fill'),
     tooltip: 'Supporter',
     description: 'Awarded for long-term support and activity.',
+    color: '#7a7aff',
   },
   booster: {
     id: 'booster',
-    src: makeBadgeSvgDataUri('BST', '#c77dff'),
+    src: icon('rocket-takeoff-fill'),
     tooltip: 'Booster',
     description: 'Awarded to users who actively boost and promote CursedBio.',
+    color: '#c77dff',
   },
   legend: {
     id: 'legend',
-    src: makeBadgeSvgDataUri('LGD', '#ffb703', '#222222'),
+    src: icon('award-fill'),
     tooltip: 'Legend',
     description: 'Rare loyalty badge for exceptional contribution.',
+    color: '#ffb703',
   },
 }
 

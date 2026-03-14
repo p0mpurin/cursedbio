@@ -109,7 +109,16 @@ export default async function DashboardPage() {
             <div className="grid sm:grid-cols-2 gap-3">
               {awardedBadges.map((badge) => (
                 <div key={badge.id} className="p-3 rounded-xl bg-black/30 border border-white/10 flex items-center gap-3">
-                  <img src={badge.src} alt={badge.tooltip} className="w-8 h-8 object-contain shrink-0" />
+                  <div
+                    className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center border"
+                    style={{
+                      borderColor: `${badge.color ?? '#7a7aff'}88`,
+                      background: `radial-gradient(circle at 30% 30%, ${(badge.color ?? '#7a7aff')}55 0%, rgba(14,14,18,0.92) 72%)`,
+                      boxShadow: `0 6px 18px ${(badge.color ?? '#7a7aff')}33`,
+                    }}
+                  >
+                    <img src={badge.src} alt={badge.tooltip} className="w-5 h-5 object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
+                  </div>
                   <div className="min-w-0">
                     <p className="text-sm text-[var(--text-primary)] font-medium">{badge.tooltip}</p>
                     <p className="text-xs text-[var(--text-muted)]">{badge.description}</p>

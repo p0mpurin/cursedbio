@@ -463,7 +463,7 @@ function BadgesDisplay({ el, isEditMode }: { el: PageElement; isEditMode: boolea
   const opacity = (el.props.opacity as number) ?? 1
   const hiddenBadgeIds = new Set((el.props.hiddenBadgeIds as string[]) ?? [])
 
-  const [platformBadges, setPlatformBadges] = useState<Array<{ id: string; src: string; tooltip: string }>>([])
+  const [platformBadges, setPlatformBadges] = useState<Array<{ id: string; src: string; tooltip: string; color?: string }>>([])
 
   useEffect(() => {
     fetch('/api/platform-badges')
@@ -511,30 +511,47 @@ function BadgesDisplay({ el, isEditMode }: { el: PageElement; isEditMode: boolea
       {badges.map((b) => {
         const href = 'href' in b ? (b as { href?: string }).href : undefined
         const tooltip = b.tooltip ?? b.id
+        const chipColor = b.color ?? '#7a7aff'
+        const chipSize = Math.max(20, Math.round(size + 8))
         const imgEl = (
-          <img
-            src={b.src}
-            alt=""
-            title={tooltip}
+          <div
             style={{
-              width: size,
-              height: size,
-              objectFit: 'contain',
+              width: chipSize,
+              height: chipSize,
+              borderRadius: 999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: `1px solid ${chipColor}88`,
+              background: `radial-gradient(circle at 30% 30%, ${chipColor}55 0%, rgba(14,14,18,0.92) 72%)`,
+              boxShadow: `0 6px 20px ${chipColor}33`,
               flexShrink: 0,
-              ...(hoverEffect === 'lift' && !isEditMode ? { transition: 'transform 0.2s ease' } : {}),
-              ...(hoverEffect === 'glow' && !isEditMode ? { transition: 'filter 0.2s ease' } : {}),
+              transition: 'transform 0.2s ease, filter 0.2s ease',
             }}
+            title={tooltip}
             onMouseEnter={(e) => {
               if (isEditMode) return
               if (hoverEffect === 'lift') e.currentTarget.style.transform = 'translateY(-4px)'
               if (hoverEffect === 'scale') e.currentTarget.style.transform = 'scale(1.15)'
-              if (hoverEffect === 'glow') e.currentTarget.style.filter = 'drop-shadow(0 0 8px rgba(255,255,255,0.6))'
+              if (hoverEffect === 'glow') e.currentTarget.style.filter = `drop-shadow(0 0 10px ${chipColor}cc)`
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = ''
               e.currentTarget.style.filter = ''
             }}
-          />
+          >
+            <img
+              src={b.src}
+              alt=""
+              title={tooltip}
+              style={{
+                width: Math.max(14, Math.round(size * 0.66)),
+                height: Math.max(14, Math.round(size * 0.66)),
+                objectFit: 'contain',
+                filter: 'brightness(0) invert(1)',
+              }}
+            />
+          </div>
         )
         const Wrapper = href && !isEditMode ? 'a' : 'div'
         return (
